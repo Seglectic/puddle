@@ -29,21 +29,37 @@ canvas.oncontextmenu = function (e) {
 };
 
 
-//Check if coords within circle
-pointCollide = function(px,py,x,y,r){
+//Check if 2D point within circle (point x, point y, (x,y,radius) of circle)
+pointCircleCollide = function(px,py,x,y,r){
 	x -= r;
 	y -= r;
 	w = (r*2);
 	h = (r*2);
 	if(px>x&px<x+w&py>y&py<y+h){return true;}
 	else{return false;}
-}
+};
+
+//Check if 2D point within circle (point x, point y, (x,y,width,height) of rect)
+pointRectCollide = function(px,py,x,y,w,h){
+	if(px>x&px<x+w&py>y&py<y+h){return true;}
+};
+
 
 //2D distance
 distance = function(x1,y1,x2,y2){
-	var d = Math.sqrt( ((x2-x1)*(x2-x1))+((y2-y1)*(y2-y1)) );
+	var d = Math.sqrt( ((x2-x1)*(x2-x1)) + ((y2-y1)*(y2-y1)) );
 	return d;
 };
+
+//Check collision between two circles
+circleCollide = function(x1,y1,r1,x2,y2,r2){
+	var d = distance(x1,y1,x2,y2);
+	var rDist = r1+r2
+	if (d<rDist){
+		return true;}
+	else{return false}
+}
+
 
 //Random range from min-max
 RNG = function(min,max){
@@ -51,27 +67,26 @@ RNG = function(min,max){
 };
 
 
-
 /*
 				Main organism object
 */
 blorb = function(){
-	//Physical properties
+	//Genetic properties
 	this.radius = 5*Math.random()+10;
 	this.x = RNG(this.radius,canvas.width-this.radius)
 	this.y = RNG(this.radius,canvas.height-this.radius)
 	this.dx = this.x;
 	this.dy = this.y;
 	this.arc = 0;
-	//Defines how often to randomly roam about
+	//How often to roam
 	this.roamTimer = new Date().getTime() + (Math.random()*2000);
 	this.roamInterval = RNG(1000,3000);
-	//Defines how often to digest food in gut into energy
+	//How often to digest
 	this.metabolicTimer = new Date().getTime()+(Math.random()*5000);
 	this.metabolicInterval = RNG(5000,10000);
-
+	//Death counter
 	this.deathTimer = 0;
-
+	//Ego properties
 	this.hp = 100;			//Health level
 	this.energy = 10;		//Stored energy used for movement
 	this.gut = 100; 		//How much food in stomach
@@ -87,18 +102,35 @@ blorb = function(){
 		this.dy+=(Math.random() * intensity) +min;
 	};
 
+	//Constantly translate blorb toward (dx,dy)
+	this.interp = function(){
+		if(this.CND == "DECEASED"){return;}
+
+		/*Don't allow movement if colliding
+		for (var i = blorbs.length - 1; i >= 0; i--) {
+			var b = blorbs[i];
+			if (circleCollide(this.x,this.y,this.radius,b.x,b.y,b.radius)){
+				return;
+			}
+		};
+		*/
+		this.x += (this.dx-this.x)*0.06
+		this.y += (this.dy-this.y)*0.06
+
+	}
+
+
 	//Choose random nearby (dx,dy) pos to move to.
 	this.roam = function(time){
 		if(this.energy<=0){return}
-		if(time<(this.roamTimer+this.roamInterval)){return}
-		
+		if(time<(this.roamTimer+this.roamInterval)){return;}
 		this.roamTimer = new Date().getTime();
 		while(true){		
 			var destX = this.dx + RNG(-100,100);
 			var destY = this.dy + RNG(-100,100);
-			
 			//Check if roam pos is within bounding area
-			if(destX<canvas.width-this.radius&destX>0+this.radius&destY<canvas.height-this.radius&destY>0+this.radius){
+
+			if(pointRectCollide(destX,destY,this.radius,this.radius,canvas.width-this.radius,canvas.height-this.radius)){
 				this.dx = destX;
 				this.dy = destY;
 				break;
@@ -107,9 +139,7 @@ blorb = function(){
 		if(this.energy>0){
 			this.energy-=1;
 		}
-
 	};
-
 
 	//Sniffs for nearby food pellets
 	this.sniff = function(){
@@ -126,8 +156,6 @@ blorb = function(){
 				this.foodTarget = targets[0];
 				return true;
 			}
-
-
 		};
 	}
 
@@ -169,7 +197,6 @@ blorb = function(){
 			this.energy = Math.floor(this.energy);
 	};
 
-
 	//Determines condition of Blorb
 	this.condition = function(){
 		if(this.energy<=0){
@@ -210,13 +237,6 @@ blorb = function(){
 		c.fillText(energy,x,y+fontSize)
 		c.fillText(hp,x,y+(fontSize*2))
 		c.fillText(gut,x,y+(fontSize*3))
-	}
-
-	//Constantly translate blorb toward (dx,dy)
-	this.interp = function(){
-		if(this.CND == "DECEASED"){return;}
-		this.x += (this.dx-this.x)*0.06
-		this.y += (this.dy-this.y)*0.06
 	}
 
 	//blorb update logic
@@ -304,7 +324,7 @@ poops = [];
 blorbs = [];
 pellets = [];
 
-for (var i = 0; i < 20; i++) {
+for (var i = 0; i < 2; i++) {
 	blorbs.push(new blorb());
 	
 };
@@ -358,7 +378,7 @@ update = function(){
 		blorb.update(time);
 
 		//Check if mouse is over blorb and display info.
-		if(pointCollide(mouse.x,mouse.y,blorb.x,blorb.y,blorb.radius)){
+		if(pointCircleCollide(mouse.x,mouse.y,blorb.x,blorb.y,blorb.radius)){
 			blorb.info();
 		}
 	};
