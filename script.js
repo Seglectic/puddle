@@ -133,7 +133,6 @@ blorb = function(){
 			var destX = this.dx + RNG(-100,100);
 			var destY = this.dy + RNG(-100,100);
 			//Check if roam pos is within bounding area
-
 			if(pointRectCollide(destX,destY,this.radius,this.radius,canvas.width-this.radius,canvas.height-this.radius)){
 				this.dx = destX;
 				this.dy = destY;
@@ -151,7 +150,6 @@ blorb = function(){
 			var p = pellets[i];
 			var dist = distance(p.x,p.y,this.x,this.y)
 			var targets = []
-			var dists = []
 			if(dist<100){
 				targets.push(p);
 			}
@@ -165,8 +163,9 @@ blorb = function(){
 
 	//jumps towards food and consumes it
 	this.nomf = function(p){
-		this.dx = p.x;
-		this.dy = p.y;
+		if(this.gut>200){return;}
+			this.dx = p.x;
+			this.dy = p.y;
 		if(distance(p.x,p.y,this.x,this.y)<2&this.energy>=2){
 			this.energy-=2;
 			this.gut+=p.nutrition;
@@ -180,7 +179,7 @@ blorb = function(){
 		if(time<(this.metabolicTimer+this.metabolicInterval)){return;}
 			this.metabolicTimer = new Date().getTime();
 			
-			//Take units from gut and apply to energy
+			//Take units from gut and convert to energy
 			if(this.gut>0&this.energy<100){
 				var digest = RNG(5,15);
 				if (digest>this.gut){digest = this.gut} //Prevents overdrawing
@@ -190,13 +189,20 @@ blorb = function(){
 				poops.push(new poop(this.x,this.y)); //haha; push poops.
 			}
 
-			//Turn HP into energy
+			//Convert HP into energy when starving
 			if(this.energy<=0&this.gut<=0&this.hp>0){
 				var atrophy = RNG(5,10)
 				if (atrophy>this.hp){atrophy=this.hp}
 				this.hp -= atrophy;
 				this.energy+= atrophy*0.6;
 				if(this.energy>100){this.energy=100;}
+			}
+
+			//Convert energy to HP when hurt
+			if(this.hp>100&this.energy>=3){
+				this.hp+=RNG(10,20);
+				this.energy-=3;
+				if(this.hp>100){this.hp=100;}
 			}
 			this.energy = Math.floor(this.energy);
 	};
@@ -208,6 +214,9 @@ blorb = function(){
 		}
 		if(this.gut>0&this.energy>0&this.hp>0){
 			this.CND="HAPPY";
+		}
+		if(this.gut>200){
+			this.CND = "FULL";
 		}
 		if(this.gut<=0){
 			this.CND="HUNGRY";
@@ -226,13 +235,11 @@ blorb = function(){
 		var fontSize = 15
 		var y = this.y-this.radius-fontSize;
 		var r = Math.floor(this.radius)
-
+		//Move text to left when on right of screen
 		if(this.x<canvas.width/2){var x = this.x+this.radius+20;}
 		else{var x = this.x-(this.radius)-120}
-
 		c.fillStyle = "White";
 		c.font = (fontSize+"px Lucida Console")
-		
 		var name = "Blorb #"+blorbs.indexOf(this)+" ["+this.CND+"]";
 		var energy = "Energy: "+Math.floor(this.energy);
 		var hp = "Health: "+Math.floor(this.hp);
@@ -249,7 +256,7 @@ blorb = function(){
 		this.condition();
 		this.jiggle(time);
 		this.interp();
-		if(this.sniff()){
+		if(this.gut<200&this.sniff()){
 			this.nomf(this.foodTarget);
 		}else{
 			this.roam(time);
@@ -306,16 +313,26 @@ pellet = function(x,y){
 	this.x= x;
 	this.y= y;
 	this.nutrition = RNG(20,40,true);
+	this.alpha=0;
 	this.update = function(){
-
+		if (this.alpha<1){this.alpha+=0.01;}
 		this.draw();
 	};
 
 	this.draw = function(){
-		c.fillStyle = "rgba(255,255,100,1)";
+		c.fillStyle = "rgba(255,255,100,"+this.alpha+")";
 		c.fillRect(this.x,this.y,10,10);
 	};
+}
 
+
+//Constantly keep food spawned around screen
+pelletSpawn = function(){
+	if (pellets.length<=5){
+		for (var i = 0; pellets.length < 20; i++) {
+			pellets.push(new pellet(canvas.width*Math.random(),canvas.height*Math.random()))
+		};		
+	}
 }
 
 
@@ -325,7 +342,7 @@ poops = [];
 blorbs = [];
 pellets = [];
 
-for (var i = 0; i < 2; i++) {
+for (var i = 0; i < 20; i++) {
 	blorbs.push(new blorb());
 	
 };
@@ -358,6 +375,7 @@ update = function(){
 	drawbG();
 	var time = new Date().getTime();
 
+	pelletSpawn();
 
 	/*Update poops*/
 	for (var i = poops.length - 1; i >= 0; i--) {
