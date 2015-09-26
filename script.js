@@ -55,7 +55,7 @@ distance = function(x1,y1,x2,y2){
 circleCollide = function(x1,y1,r1,x2,y2,r2){
 	var d = distance(x1,y1,x2,y2);
 	var rDist = r1+r2
-	if (d<rDist){
+	if (d<=rDist){
 		return true;}
 	else{return false}
 }
