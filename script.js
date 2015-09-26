@@ -61,9 +61,11 @@ circleCollide = function(x1,y1,r1,x2,y2,r2){
 }
 
 
-//Random range from min-max
-RNG = function(min,max){
-	return (Math.random()*(max-min))+min;
+//Random range from min-max, bool int if rounding
+RNG = function(min,max,int){
+	var RNG = (Math.random()*(max-min))+min;
+	if (int){RNG = Math.floor(RNG);}
+	return RNG;
 };
 
 
@@ -78,12 +80,16 @@ blorb = function(){
 	this.dx = this.x;
 	this.dy = this.y;
 	this.arc = 0;
+	this.jiggle = RNG(5,15,true);
 	//How often to roam
 	this.roamTimer = new Date().getTime() + (Math.random()*2000);
 	this.roamInterval = RNG(1000,3000);
 	//How often to digest
 	this.metabolicTimer = new Date().getTime()+(Math.random()*5000);
 	this.metabolicInterval = RNG(5000,10000);
+	//How often to jiggle
+	this.jiggleTimer = new Date().getTime()+(Math.random()*100);
+	this.jiggleInterval = RNG(50,100);
 	//Death counter
 	this.deathTimer = 0;
 	//Ego properties
@@ -94,18 +100,17 @@ blorb = function(){
 	this.foodTarget = null; //Reference to desired object
 
 	//Random jiggly movement
-	this.jiggle = function(intensity){
+	this.jiggle = function(time){
 		if (this.energy<=0){return}
-		intensity -= intensity/2
-		min = intensity/2*-1
-		this.dx+=(Math.random() * intensity) +min;
-		this.dy+=(Math.random() * intensity) +min;
+		if(time<(this.jiggleTimer+this.jiggleInterval)){return;}
+		this.jiggleTimer = new Date().getTime();
+		this.dx +=RNG(-5,5);
+		this.dy +=RNG(-5,5);
 	};
 
 	//Constantly translate blorb toward (dx,dy)
 	this.interp = function(){
 		if(this.CND == "DECEASED"){return;}
-
 		/*Don't allow movement if colliding
 		for (var i = blorbs.length - 1; i >= 0; i--) {
 			var b = blorbs[i];
@@ -118,7 +123,6 @@ blorb = function(){
 		this.y += (this.dy-this.y)*0.06
 
 	}
-
 
 	//Choose random nearby (dx,dy) pos to move to.
 	this.roam = function(time){
@@ -242,12 +246,9 @@ blorb = function(){
 	//blorb update logic
 	this.update = function(time){
 		if(this.arc>-2){this.draw();return;} //Let arc spin before beginning logic
-
 		this.condition();
-		this.jiggle(5);
+		this.jiggle(time);
 		this.interp();
-
-		
 		if(this.sniff()){
 			this.nomf(this.foodTarget);
 		}else{
@@ -304,7 +305,7 @@ poop = function(x,y){
 pellet = function(x,y){
 	this.x= x;
 	this.y= y;
-	this.nutrition = Math.floor(RNG(20,40));
+	this.nutrition = RNG(20,40,true);
 	this.update = function(){
 
 		this.draw();
