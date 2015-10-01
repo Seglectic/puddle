@@ -1,3 +1,22 @@
+/*
+
+							PUDDLE
+
+		Puddle is an environment for cellular automata 
+		called "Blorbs" to eke out their lives within
+		your web browser. They are born, eat and die.
+
+		Please appreciate them.
+*/
+
+
+/*
+				  Environment Setup
+		This section is for the preparation of
+		the web environment to allow to for a 
+		a decent browser experience
+*/
+
 canvas = document.createElement("canvas");
 canvas.id = "game";
 canvas.height=window.innerHeight-20;
@@ -5,8 +24,8 @@ canvas.width=window.innerWidth-20;
 c = canvas.getContext("2d");
 document.body.appendChild(canvas);
 
-var mouse = {x:-100,y:-100,lClick:false,rClick:false};
 
+var mouse = {x:-100,y:-100,lClick:false,rClick:false};
 
 //Gets mouse position into global mouse object
 canvas.addEventListener('mousemove',function(e){
@@ -28,6 +47,14 @@ canvas.oncontextmenu = function (e) {
     e.preventDefault();
 };
 
+
+/*
+	
+				General-Purpose Function Declaration
+		This section reserved for general functions that find
+		use throughout puddle and not specific to any object
+
+*/
 
 //Check if 2D point within circle (point x, point y, (x,y,radius) of circle)
 pointCircleCollide = function(px,py,x,y,r){
@@ -70,7 +97,10 @@ RNG = function(min,max,int){
 
 
 /*
-				Main organism object
+				Blorb Object Prototype
+		These are the main characters of puddle;
+		roaming about, eating food, shitting and
+		dying are their main past-times.
 */
 blorb = function(){
 	//Genetic properties
@@ -80,32 +110,36 @@ blorb = function(){
 	this.dx = this.x;
 	this.dy = this.y;
 	this.arc = 0;
-	this.jiggle = RNG(5,15,true);
+	this.strokeClr = {r:200,g:90,b:20};
+	this.fillClr = {r:20,g:200,b:20};
+
 	//How often to roam
 	this.roamTimer = new Date().getTime() + (Math.random()*2000);
 	this.roamInterval = RNG(1000,3000);
+	this.jiggleIntensity = (this.roamInterval/1000)*RNG(1,5,true);
 	//How often to digest
 	this.metabolicTimer = new Date().getTime()+(Math.random()*5000);
 	this.metabolicInterval = RNG(5000,10000);
 	//How often to jiggle
 	this.jiggleTimer = new Date().getTime()+(Math.random()*100);
 	this.jiggleInterval = RNG(50,100);
-	//Death counter
-	this.deathTimer = 0;
+	//How quickly to rot
+	this.rotTimer = new Date().getTime();
+	this.rotInterval = 50;
 	//Ego properties
-	this.hp = 100;			//Health level
-	this.energy = 10;		//Stored energy used for movement
-	this.gut = 100; 		//How much food in stomach
+	this.hp = 10;			//Health level
+	this.energy = 3;		//Stored energy used for movement
+	this.gut = 0; 		//How much food in stomach
 	this.CND= "UNKNOWN";	//Current status
 	this.foodTarget = null; //Reference to desired object
 
 	//Random jiggly movement
-	this.jiggle = function(time){
+	this.jiggle = function(time,jiggleIntensity){
 		if (this.energy<=0){return}
 		if(time<(this.jiggleTimer+this.jiggleInterval)){return;}
 		this.jiggleTimer = new Date().getTime();
-		this.dx +=RNG(-5,5);
-		this.dy +=RNG(-5,5);
+		this.dx +=RNG(-jiggleIntensity,jiggleIntensity);
+		this.dy +=RNG(-jiggleIntensity,jiggleIntensity);
 	};
 
 	//Constantly translate blorb toward (dx,dy)
@@ -177,37 +211,48 @@ blorb = function(){
 	//Turn food in gut into energy
 	this.metabolize = function(time){
 		if(time<(this.metabolicTimer+this.metabolicInterval)){return;}
-			this.metabolicTimer = new Date().getTime();
-			
-			//Take units from gut and convert to energy
-			if(this.gut>0&this.energy<100){
-				var digest = RNG(5,15);
-				if (digest>this.gut){digest = this.gut} //Prevents overdrawing
-				this.gut-= digest;
-				this.energy+= digest*0.8;
-				if (this.energy>100){this.energy=100}
-				poops.push(new poop(this.x,this.y)); //haha; push poops.
-			}
+		this.metabolicTimer = new Date().getTime();
+		
+		//Take units from gut and convert to energy
+		if(this.gut>0&this.energy<100){
+			var digest = RNG(5,15);
+			if (digest>this.gut){digest = this.gut} //Prevents overdrawing
+			this.gut-= digest;
+			this.energy+= digest*0.8;
+			if (this.energy>100){this.energy=100}
+			poops.push(new poop(this.x,this.y)); //haha; push poops.
+		}
 
-			//Convert HP into energy when starving
-			if(this.energy<=0&this.gut<=0&this.hp>0){
-				var atrophy = RNG(5,10)
-				if (atrophy>this.hp){atrophy=this.hp}
-				this.hp -= atrophy;
-				this.energy+= atrophy*0.6;
-				if(this.energy>100){this.energy=100;}
-			}
+		//Convert HP into energy when starving
+		if(this.energy<=0&this.gut<=0&this.hp>0){
+			var atrophy = RNG(5,10)
+			if (atrophy>this.hp){atrophy=this.hp}
+			this.hp -= atrophy;
+			this.energy+= atrophy*0.6;
+			if(this.energy>100){this.energy=100;}
+		}
 
-			//Convert energy to HP when hurt
-			if(this.hp>100&this.energy>=3){
-				this.hp+=RNG(10,20);
-				this.energy-=3;
-				if(this.hp>100){this.hp=100;}
-			}
-			this.energy = Math.floor(this.energy);
+		//Convert energy to HP when hurt
+		if(this.hp>100&this.energy>=3){
+			this.hp+=RNG(10,20);
+			this.energy-=3;
+			if(this.hp>100){this.hp=100;}
+		}
+		this.energy = Math.floor(this.energy);
 	};
 
-	//Determines condition of Blorb
+	//Determines what should be done when Blorbs are dead
+	this.rot = function(time){
+		if(time<(this.rotTimer+this.rotInterval)){return;}
+		this.rotTimer = new Date().getTime();
+		if(this.fillClr.r > 0){
+			this.fillClr.r -= 1;
+		}
+
+
+	};
+
+	//Analyze condition of Blorb
 	this.condition = function(){
 		if(this.energy<=0){
 			this.CND = "TIRED";
@@ -224,7 +269,7 @@ blorb = function(){
 		if(this.gut<=0&this.energy<=0){
 			this.CND="DYING";
 		}
-		if(this.hp<=0&this.gut<=0&this.energy<=0){
+		if(this.hp<=0&this.energy<=0){
 			this.CND="DECEASED";
 		}
 	}
@@ -250,28 +295,31 @@ blorb = function(){
 		c.fillText(gut,x,y+(fontSize*3))
 	}
 
-	//blorb update logic
+	//Blorb update logic
 	this.update = function(time){
 		if(this.arc>-2){this.draw();return;} //Let arc spin before beginning logic
 		this.condition();
-		this.jiggle(time);
+		this.jiggle(time,this.jiggleIntensity);
 		this.interp();
 		if(this.gut<200&this.sniff()){
 			this.nomf(this.foodTarget);
 		}else{
 			this.roam(time);
 		}
-		
 		this.metabolize(time);
+		if (this.CND ==="DECEASED"){
+			this.rot();
+		}
 		this.draw();
 	};
 
 	//Render blorb
 	this.draw = function(){
 		if (this.arc>-2){this.arc-=Math.random()*0.05}
-
-		c.fillStyle = "rgba(20,200,20,1)";
-		c.strokeStyle = "rgba(200,90,90,1)";
+		var f = this.fillClr;
+		var s = this.strokeClr;
+		c.fillStyle = "rgba("+this.fillClr.r+","+this.fillClr.g+","+this.fillClr.b+",1)";
+		c.strokeStyle = "rgba("+this.strokeClr.r+","+this.strokeClr.g+","+this.strokeClr.b+",1)";
 		c.lineWidth = 5;
 		c.beginPath();
 		c.arc(this.x,this.y,this.radius,this.arc*Math.PI,false);
@@ -281,34 +329,14 @@ blorb = function(){
 }
 
 
-//Blorb excrement
-poop = function(x,y){
-	this.x = x;
-	this.y = y;
-	this.radius = RNG(3,6);
-	this.alpha = 1;
-	this.outline = RNG(0.5,2)
-	this.update = function(){
-		this.draw();
-		this.alpha-=0.001;
-		if (this.alpha<0){
-			poops.splice(poops.indexOf(this),1)
-			return
-		}
-	};
 
-	this.draw = function(){
-		c.fillStyle = "rgba(100,100,50,"+this.alpha+")";
-		c.strokeStyle = "rgba(100,150,50,"+this.alpha+")";
-		c.lineWidth = this.outline;
-		c.beginPath();
-		c.arc(this.x,this.y,this.radius,2*Math.PI,false);
-		c.fill();
-		c.stroke();		
-	};
-}
 
-//Edible food pellets
+/*
+				Edible Food Pellet Prototype
+		Blorbs love these! Each food object has a
+		nutrition attribute that goes toward fueling
+		blorb activity.
+*/
 pellet = function(x,y){
 	this.x= x;
 	this.y= y;
@@ -335,9 +363,44 @@ pelletSpawn = function(){
 	}
 }
 
+/*
+				Excrement Prototype
+		Blorbs excrete these objects when they
+		metabolize food pellets into energy.
+*/
+poop = function(x,y){
+	this.x = x;
+	this.y = y;
+	this.radius = RNG(3,6);
+	this.alpha = 1;
+	this.outline = RNG(0.5,2)
+	this.update = function(){
+		this.draw();
+		this.alpha-=0.001;
+		if (this.alpha<0){
+			poops.splice(poops.indexOf(this),1)
+			return
+		}
+	};
+
+	this.draw = function(){
+		c.fillStyle = "rgba(100,100,50,"+this.alpha+")";
+		c.strokeStyle = "rgba(100,150,50,"+this.alpha+")";
+		c.lineWidth = this.outline;
+		c.beginPath();
+		c.arc(this.x,this.y,this.radius,2*Math.PI,false);
+		c.fill();
+		c.stroke();		
+	};
+}
 
 
-			/* SETUP */
+
+/*
+					PUDDLE SETUP
+		Sets up the puddle with initialization 
+		of globals and initial Blorb creation.
+*/
 poops = [];
 blorbs = [];
 pellets = [];
@@ -348,22 +411,21 @@ for (var i = 0; i < 20; i++) {
 };
 
 
-for (var i = 0; i < 20; i++) {
-	pellets.push(new pellet(canvas.width*Math.random(),canvas.height*Math.random()))
-};
 
 
+/*
+					VISUAL FX
+		Defines some fancy/necessary routines
+		for painting to our canvas.
+*/
 
-
-
-
-
-
+//Draw puddle background
 drawbG = function(){
     c.fillStyle= "rgba(10,10,20,0.6)";
     c.fillRect(0,0,canvas.width,canvas.height);
 };
 
+//Draw scanlines
 scanLines = function(){
     for (line=1;line<=canvas.height;line+=2){
         c.fillStyle="rgba(0,0,0,0.1)";
@@ -371,11 +433,18 @@ scanLines = function(){
     }
 }
 
+
+/*
+					MAIN GAME UPDATE LOOP
+			All magic called from this function
+*/
+
 update = function(){
 	drawbG();
 	var time = new Date().getTime();
 
-	pelletSpawn();
+	//Automatically spawn pellets?
+	// pelletSpawn();
 
 	/*Update poops*/
 	for (var i = poops.length - 1; i >= 0; i--) {
@@ -408,8 +477,6 @@ update = function(){
 		pellets.push(new pellet(mouse.x,mouse.y))
 	}
 	
-
-
 	scanLines();
 };
 
