@@ -235,8 +235,8 @@ blorb = function(){
 			this.vy*= -0.8;
 		}
 		//Apply friction
-		//this.vx += (0 - this.vx)*0.03;
-		//this.vy += (0 - this.vy)*0.03;
+		this.vx += (0 - this.vx)*0.03;
+		this.vy += (0 - this.vy)*0.03;
 	}
 
 	//Updates blorb velocity at interval
