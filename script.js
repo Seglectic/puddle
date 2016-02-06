@@ -116,6 +116,7 @@ mouse();
 
 
 
+
 /*
 				Blorb Object Prototype
 		These are the main characters of puddle;
@@ -257,7 +258,7 @@ blorb = function(){
 			this.gut-= digest;
 			this.energy+= digest*0.8;
 			if (this.energy>100){this.energy=100}
-			poops.push(new poop(this.x,this.y,digest*0.4)); //haha; push poops.
+			poops.push(new poop(this.x,this.y,digest*0.2)); //haha; push poops.
 		}
 
 		//Convert HP into energy when starving
@@ -511,16 +512,25 @@ puddleUpdate = function(){
 		var blorb = blorbs[i];
 		blorb.update(time);
 
-		//Check if mouse is over blorb and display info.
+		/*Check if mouse is over blorb and display info.
 		if(pointCircleCollide(mouse.x,mouse.y,blorb.x,blorb.y,blorb.radius)){
 			blorb.info();
+		}*/
+		if(distance(blorb.x,blorb.y,mouse.x,mouse.y)<80){
+			blorb.info();
+			c.strokeStyle = "rgb(200,100,0)"
+			c.beginPath();
+			c.moveTo(mouse.x,mouse.y);
+			c.lineTo(blorb.x,blorb.y);
+			c.stroke();
+
 		}
 	};
 
 
 	//Click to create pellets
 	if(mouse.lClick){
-		if (pellets.length<30){
+		if (pellets.length<100){
 			pellets.push(new pellet(mouse.x,mouse.y));
 		}
 	}
