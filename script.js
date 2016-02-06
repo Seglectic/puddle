@@ -23,8 +23,8 @@ pellets = [];
 
 canvas = document.createElement("canvas");
 canvas.id = "game";
-canvas.height=window.innerHeight-30;
-canvas.width=window.innerWidth-30;
+canvas.height=window.innerHeight-22;
+canvas.width=window.innerWidth-22;
 c = canvas.getContext("2d");
 document.body.appendChild(canvas);
 
@@ -117,15 +117,15 @@ mouse();
 */
 blorb = function(){
 	//Genetic properties
-	this.baseRadius = 5*Math.random()+10; //Starting r
+	this.baseRadius = RNG(5,10); //Starting r
 	this.radius = this.baseRadius;		  //Current r
-	this.x = RNG(this.radius,canvas.width-this.radius)
-	this.y = RNG(this.radius,canvas.height-this.radius)
+	this.x = RNG(this.radius,canvas.width-this.radius);
+	this.y = RNG(this.radius,canvas.height-this.radius);
 	//Initial velocities (5 is quite fast)
 	this.vx = RNG(-3,3);  
 	this.vy = RNG(-3,3);
 	this.arc = 0;
-	this.strokeClr = {r:200,g:90,b:20};
+	this.strokeClr = {r:20,g:20,b:90};
 	this.fillClr = {r:20,g:200,b:20};
 	//How thick to draw the line around nucleus
 	this.baseMembrane = 5;
@@ -134,30 +134,29 @@ blorb = function(){
 	this.roamTimer = new Date().getTime() + RNG(2000,3000);
 	this.roamInterval = RNG(1000,3000);
 	this.jigIntensity = (this.roamInterval/1000)*RNG(1,5,true);
-	//How often to digest
+	//How often to convery food into energy
 	this.metabolicTimer = new Date().getTime()+(Math.random()*5000);
 	this.metabolicInterval = RNG(5000,10000);
-	//How often to jiggle
-	this.jiggleTimer = new Date().getTime()+(Math.random()*100);
-	this.jiggleInterval = RNG(50,100);
 	//How quickly to rot
 	this.rotTimer = new Date().getTime();
 	this.rotInterval = 100;
 	//Health properties
-	this.hp = 100;			//Health level
-	this.energy = 20;		//Stored energy used for movement
-	this.gut = 0; 			//How much food in stomach
-	this.CND= "UNKNOWN";	//Current status
-	this.foodTarget = null; //Reference to desired object
-
-	//Random jiggly movement
-	this.jiggle = function(time,jigIntensity){
-		if (this.energy<=0){return};
-		if(time<(this.jiggleTimer+this.jiggleInterval)){return};
-		this.jiggleTimer = time;
-		this.dx +=RNG(-jigIntensity,jigIntensity);
-		this.dy +=RNG(-jigIntensity,jigIntensity);
-	};
+	this.beatTimer = new Date().getTime();	//How often to pulsate
+	this.heart = 1;							//Requires delta for Blorb to function
+	this.hp = 100;							//Health level
+	this.energy = 20;						//Stored energy used for movement
+	this.gut = 100; 							//How much food in stomach
+	this.CND= "UNKNOWN";					//Current status
+	this.foodTarget = null; 				//Reference to desired object
+	//Sniff circle properties
+	this.sniffing = false;
+	this.sniffRange = 50;
+	this.sniffRadius = 0;
+	this.sniffAlpha = 1;
+	this.sniffSpeed = 1;
+	this.sniffTimer = new Date().getTime();
+	this.sniffInterval = RNG(1000,4000);
+	this.baseSniffInterval = this.sniffInterval;
 
 	//Check for collision vs other Blorbs
 	this.blorbCollide = function(){
@@ -181,34 +180,37 @@ blorb = function(){
 				continue;
 			}
 
+			//Invert velocity upon collision
+			this.vx*=-1; this.vy*=-1;
+			b.vx*=-1; b.vy* -1;
+			this.x+=this.vx; this.y+=this.vy;
+			b.x+=b.vx; b.y+=b.vy;
+			
+			/*Elastic collision:
 			var mass1 = this.radius*10;
 			var mass2 = b.radius*10;
-
-			this.vx *= -1
-			this.vy *= -1
-			b.vx *= -1
-			b.vy *= -1
-			this.x+=this.vx
-			this.y+=this.vy
-			b.x+=b.vx
-			b.y+=b.vy
-
-			//Elastic collision: ()
-			//this.vx = (this.vx * (mass1 - mass2) + (2 * mass2 * b.vx)) / (mass1 + mass2);
-			//this.vy = (this.vy * (mass1 - mass2) + (2 * mass2 * b.vy)) / (mass1 + mass2);
-			//b.vx = (b.vx * (mass2 - mass1) + (2 * mass1 * this.vx)) / (mass1 + mass2);
-			//b.vy = (b.vy * (mass2 - mass1) + (2 * mass1 * this.vy)) / (mass1 + mass2);
+			this.vx = (this.vx * (mass1 - mass2) + (2 * mass2 * b.vx)) / (mass1 + mass2);
+			this.vy = (this.vy * (mass1 - mass2) + (2 * mass2 * b.vy)) / (mass1 + mass2);
+			b.vx = (b.vx * (mass2 - mass1) + (2 * mass1 * this.vx)) / (mass1 + mass2);
+			b.vy = (b.vy * (mass2 - mass1) + (2 * mass1 * this.vy)) / (mass1 + mass2);
+			*/
 		};
 	}
 
-	//Constantly translate blorb toward (dx,dy)
-	this.interp = function(){
-		if(this.CND == "DECEASED"){return};
+	this.heartBeat = function(){
+		if(this.energy<=0){return false};
+		this.energy -= 0.01;
+		this.heart *= -1;
 
-		this.x += (this.dx-this.x)*0.06
-		this.y += (this.dy-this.y)*0.06
+		if(this.heart==1){
+			this.fillClr.r = 20;
+			this.fillClr.g = 200;
+		}else{
+			this.fillClr.r = 100;
+			this.fillClr.g = 150;
+		}
+		return true;
 	}
-
 
 	//Move blorb according to velocity
 	this.move = function(){
@@ -242,51 +244,77 @@ blorb = function(){
 	//Updates blorb velocity at interval
 	this.roam = function(time){
 		if(this.energy<=0){return};
-		if(time<(this.roamTimer+this.roamInterval)){return};
+		if(time<(this.roamTimer+this.roamInterval) & !this.foodTarget){return};
 		this.roamTimer = time;
 		//Randomize velocity vector	
 		this.vx = RNG(-2,2);
 		this.vy = RNG(-2,2);
+		//Consume energy based on velocity magnitude average
+		this.energy -= (this.vx+this.vy)/2;
 	};
 
 	//Sniffs for nearby food pellets
-	this.sniff = function(){
+	this.sniff = function(time){
+		if(this.energy<=0 || this.foodTarget!= null){return;}
+		if (time<(this.sniffTimer+this.sniffInterval)){return};
+
+		if(this.condition == "HAPPY"){
+			this.sniffInterval = this.baseSniffInterval; 
+			this.sniffRange=50;
+			this.sniffSpeed = 1;
+		};
+		if(this.condition == "HUNGRY"){
+			this.sniffInterval=RNG(500,2000); 
+			this.sniffRange=100;
+			this.sniffSpeed = 2;
+		};
+		if(this.condition == "DYING"){
+			this.sniffInterval = RNG(100,300); 
+			this.sniffRange=150
+			this.sniffSpeed = 3;
+		}
+
+		if (this.sniffRadius>this.sniffRange){
+			this.sniffTimer = time;
+			this.sniffAlpha = 1;
+			this.sniffRadius = 0;
+		}
+		this.sniffRadius += this.sniffSpeed;
+		this.sniffAlpha = (1-(this.sniffRadius/this.sniffRange))*0.4;
+
 		for (var i = pellets.length - 1; i >= 0; i--) {
 			var p = pellets[i];
 			var dist = distance(p.x,p.y,this.x,this.y)
-			var targets = []
-			if(dist<100){
-				targets.push(p);
-			}
-			if(targets.length>0){
-				targets = targets.sort();
-				this.foodTarget = targets[0];
-				return true;
+			if(dist<this.sniffRadius){ 
+				this.foodTarget = p;
+				this.sniffTimer = time;
+				this.sniffAlpha = 1;
+				this.sniffRadius = 0;
+				break;
 			}
 		};
 	}
 
-	//Jump towards food and consume it
-	this.nomf = function(p){
-		if(this.gut>200){return;}
-		if(this.gut>5&this.energy<5){return;}
+	//Move toward food if located
+	this.nomf = function(){
+		var p = this.foodTarget;
+		if(this.gut>200){this.foodTarget = null; return;}
+		if(this.foodTarget == null){return;}
+		//Calculate direction
+		this.vx = (p.x - this.x)*0.1;
+		this.vy = (p.y - this.y)*0.1;
 
-		if(distance(p.x,p.y,this.x,this.y)<2&this.energy>=1){
-			this.energy-=2;
+		if(distance(p.x,p.y,this.x,this.y)<this.radius&this.energy>=1){
 			this.gut+=p.nutrition;
 			this.foodTarget=null;
 			pellets.splice(pellets.indexOf(p),1);
 		}
-		if(this.energy>=2){
-			this.dx = p.x;
-			this.dy = p.y;
-		}
 	}
 
-	//Draw blorb at different proportions based on food levels
+	//Give blorb different proportions based on food levels
 	this.fat = function(){
 		var fat = this.baseMembrane * (this.energy/50) 
-		var nucleus = this.baseRadius * (this.gut/100)
+		var nucleus = this.baseRadius*(this.gut/100)+5
 		if(nucleus<5){nucleus=5;}
 		if(fat<3){fat=3;}
 		this.membrane += fat-this.membrane;
@@ -336,12 +364,16 @@ blorb = function(){
 		if(this.fillClr.g > 0){
 			this.fillClr.g -= 1;
 		}
-		if(this.strokeClr.r > 40){
-			this.strokeClr.r -=1;
+		if(this.strokeClr.r < 255){
+			this.strokeClr.r +=1;
 		}
-		if(this.strokeClr.g > 20){
-			this.strokeClr.g -=1;
+		if(this.strokeClr.g < 255){
+			this.strokeClr.g +=1;
 		}
+		if(this.strokeClr.b < 255){
+			this.strokeClr.b +=1;
+		}
+
 	};
 
 	//Analyze condition of Blorb
@@ -369,7 +401,7 @@ blorb = function(){
 
 	//Draw textual information about blorb nearby.
 	this.info = function(){
-		var fontSize = 15
+		var fontSize = 12
 		var y = this.y-this.radius-fontSize;
 		var r = Math.floor(this.radius)
 		//Move text to left when on right of screen
@@ -378,8 +410,8 @@ blorb = function(){
 		c.fillStyle = "White";
 		c.font = (fontSize+"px Lucida Console")
 		var name = "Blorb #"+blorbs.indexOf(this)+" ["+this.CND+"]";
-		//var energy = "Energy: "+Math.floor(this.energy);
-		var energy = "POS: "+this.x+' '+this.y;
+		var energy = "Energy: "+Math.floor(this.energy);
+		//var energy = "POS: "+this.x+' '+this.y;
 		var hp = "Health: "+Math.floor(this.hp);
 		var gut = "Gut: "+Math.floor(this.gut)+"% full"
 		c.fillText(name,x,y)
@@ -391,14 +423,16 @@ blorb = function(){
 	//Blorb update logic
 	this.update = function(time){
 		if(this.arc>-2){this.draw();return;} //Let arc spin before beginning logic
-		this.condition();
-		this.jiggle(time,this.jigIntensity);
+		//this.heartBeat();
 		
+		this.sniff(time);
+		this.nomf();
+		this.condition();		
 		this.move();
 		this.roam(time);
 		this.blorbCollide()
-
 		this.metabolize(time);
+		
 		if (this.CND ==="DECEASED"){
 			this.rot(time);
 		}
@@ -407,6 +441,13 @@ blorb = function(){
 
 	//Render blorb
 	this.draw = function(){
+		//Draw sniffSpheres
+		c.lineWidth = 2;
+		c.strokeStyle = "rgba(255,255,255,"+this.sniffAlpha+")";
+		c.beginPath();
+		c.arc(this.x,this.y,this.sniffRadius,2*Math.PI,false);
+		c.stroke();
+
 		this.fat();
 		if (this.arc>-2){this.arc-=Math.random()*0.05}
 		var f = this.fillClr;
@@ -431,30 +472,56 @@ blorb = function(){
 */
 
 pellet = function(x,y){
+	var self = this;
 	this.x= x;
 	this.y= y;
-	this.nutrition = RNG(20,40,true);
+	this.nutrition = RNG(20,40,true); 		//Energy value provided
 	var sizePercent = (this.nutrition/40)*5
 	this.w = sizePercent*2;
 	this.h = sizePercent;
 	this.alpha=0;
+	this.particles = [];					//Holds particles to be emitted
+
+	this.particle = function(){
+		this.life = RNG(100,200);
+		this.x = self.x;
+		this.y = self.y;
+		this.vx = RNG(-1,1);
+		this.vy = RNG(-1,1);
+		this.life= new 
+
+		this.update = function(){
+			this.x+=this.vx;
+			this.y+=this.vy;
+			c.fillRect(this.x-self.w/2,this.y-self.h/2,1,1);
+		}
+	}
+
+	for (var i = 0; i < 3; i++) {
+		//this.particles.push(new this.particle) //Currently laggy
+	};
+
 	this.update = function(){
 		if (this.alpha<1){this.alpha+=0.01;}
 		this.draw();
+
+		for (var i = 0; i < this.particles.length; i++) {
+			var p = this.particles[i];
+			p.update();
+		};
 	};
 
 	this.draw = function(){
-		c.fillStyle = "rgba(255,255,100,"+this.alpha+")";
+		c.fillStyle = "rgba(250,50,150,"+this.alpha+")";
 		c.fillRect(this.x-this.w/2,this.y-this.h/2,this.w,this.h);
 	};
 }
-
 
 //Constantly keep food spawned around screen
 pelletSpawn = function(){
 	if (pellets.length<=5){
 		for (var i = 0; pellets.length < 20; i++) {
-			pellets.push(new pellet(canvas.width*Math.random(),canvas.height*Math.random()))
+			pellets.push(new pellet(RNG(50,canvas.width-50),RNG(50,canvas.height-50)) )
 		};		
 	}
 }
@@ -558,20 +625,16 @@ puddleUpdate = function(){
 		var blorb = blorbs[i];
 		blorb.update(time);
 
-		/*Check if mouse is over blorb and display info.
-		if(pointCircleCollide(mouse.x,mouse.y,blorb.x,blorb.y,blorb.radius)){
-			blorb.info();
-		}*/
-		
-		/* Draw info near cursor
+		// Draw info near cursor
 		if(distance(blorb.x,blorb.y,mouse.x,mouse.y)<80){
 			blorb.info();
-			c.strokeStyle = "rgb(200,100,0)"
+			c.strokeStyle = "rgb(200,200,200)";
+			c.lineWidth = 1;
 			c.beginPath();
 			c.moveTo(mouse.x,mouse.y);
 			c.lineTo(blorb.x,blorb.y);
 			c.stroke();
-		}*/
+		}
 	};
 
 
