@@ -161,7 +161,7 @@ blorb = function(x,y){
 	this.sniffAlpha = 1;
 	this.sniffSpeed = 1;
 	this.sniffTimer = new Date().getTime();
-	this.sniffInterval = RNG(2000,5000);
+	this.sniffInterval = RNG(2000,4000);
 	this.baseSniffInterval = this.sniffInterval;
 
 	//Check for collision vs other Blorbs
@@ -261,8 +261,8 @@ blorb = function(x,y){
 
 		if(this.CND == "HAPPY"){
 			this.sniffInterval = this.baseSniffInterval; 
-			this.sniffRange=35;
-			this.sniffSpeed = 0.5;
+			this.sniffRange=45;
+			this.sniffSpeed = 1;
 		};
 		if(this.CND == "HUNGRY"){
 			this.sniffInterval=RNG(500,1000); 
@@ -441,7 +441,7 @@ blorb = function(x,y){
 	//Render blorb
 	this.draw = function(){
 		//Draw sniffSpheres
-		if (!this.CND=="DECEASED"){
+		if (this.CND!="DECEASED"){
 			c.lineWidth = 2;
 			c.strokeStyle = "rgba(255,255,255,"+this.sniffAlpha+")";
 			c.beginPath();
@@ -524,6 +524,7 @@ poop = function(x,y,size){
 	this.baseAlpha = RNG(0.5,1);
 	this.alpha= 0;
 	this.outline = RNG(0.5,2)
+	this.friction = RNG(0.05,0.1);
 
 	this.update = function(){
 		//Remove poop if 'decayed' or offscreen
@@ -540,7 +541,7 @@ poop = function(x,y,size){
 		//Apply (simple) friction and velocity to poops
 		if(this.vx>0){
 			this.x+=this.vx;
-			this.vx-=0.1;
+			this.vx-=this.friction;
 		}
 		//Set poop x velocity on collision with sweeper to allow sweeping.
 		if(this.x<sweeper.x+sweeper.w&this.x>sweeper.x){
