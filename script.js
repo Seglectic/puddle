@@ -245,8 +245,10 @@ blorb = function(x,y){
 	//Updates blorb velocity at interval
 	this.roam = function(time){
 		if(this.energy<=0){return};
-		if(time<(this.roamTimer+this.roamInterval) & !this.foodTarget){return};
+		if(time<(this.roamTimer+this.roamInterval)){return};
+		if(this.foodTarget){return};
 		this.roamTimer = time;
+
 		//Randomize velocity vector	
 		this.vx = RNG(-2,2);
 		this.vy = RNG(-2,2);
@@ -297,19 +299,30 @@ blorb = function(x,y){
 	}
 
 	//Move toward food if located
-	this.nomf = function(){
+	this.nomf = function(time){
+		//Consume pellet regardless if timer passed
+		if(this.foodTarget == null){return};
 		var p = this.foodTarget;
-		if(this.gut>200){this.foodTarget = null; return;}
-		if(this.foodTarget == null){return;}
-		//Calculate direction
-		this.vx = (p.x - this.x)*0.1;
-		this.vy = (p.y - this.y)*0.1;
-
 		if(distance(p.x,p.y,this.x,this.y)<this.radius&this.energy>=1){
 			this.gut+=p.nutrition;
-			this.foodTarget=null;
 			pellets.splice(pellets.indexOf(p),1);
+			this.foodTarget=null;
 		}
+
+		if(this.energy<=0){return};
+		if(time<(this.roamTimer+this.roamInterval)){return};
+		if(this.gut>200){this.foodTarget = null; return};
+
+		this.roamTimer = time;
+
+		//Calculate velocity vector
+		var dx = (p.x - this.x)
+		var dy = (p.y - this.y)
+		var magnitude = Math.sqrt(dx*dx + dy*dy);
+		var scaleX = dx/magnitude;
+		var scaleY = dy/magnitude;
+		this.vx = scaleX * 3;
+		this.vy = scaleY * 3;
 	}
 
 	//Give blorb different proportions based on food levels
@@ -427,7 +440,7 @@ blorb = function(x,y){
 		this.condition();
 		this.sniff(time);
 		this.roam(time);
-		this.nomf();
+		this.nomf(time);
 		this.move();
 		this.blorbCollide()
 		this.metabolize(time);
