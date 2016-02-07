@@ -8,10 +8,6 @@
 		Please appreciate them.
 */
 
-blorbs = [];
-poops = [];
-pellets = [];
-
 
 
 /*
@@ -87,6 +83,8 @@ mouse = function(){
 	this.y= -100;
 	this.lClick= false;
 	this.rClick= false;
+	this.mClick = false;
+	this.lrClick = false;
 
 	this.mouseMove = function(e){
 		var env = canvas.getBoundingClientRect();
@@ -97,11 +95,20 @@ mouse = function(){
 
 	this.mouseDown = function(e){
 		if (e.buttons==1){mouse.lClick=true;}
+		if (e.buttons==2){mouse.rClick=true;}
+		if (e.buttons==3){mouse.lrClick=true;}
+		if (e.buttons==4){mouse.mClick=true;}
+
 	};
 	canvas.addEventListener('mousedown',this.mouseDown);
 
 	this.mouseUp = function(e){
-		if (e.buttons==0){mouse.lClick=false;}
+		if (e.buttons==0){
+			mouse.lClick=false;
+			mouse.rClick=false;
+			mouse.lrClick=false;
+			mouse.mClick=false;
+		}
 	};
 	canvas.addEventListener('mouseup',this.mouseUp);
 }
@@ -115,12 +122,12 @@ mouse();
 		roaming about, eating food, shitting and
 		dying are their main past-times.
 */
-blorb = function(){
+blorb = function(x,y){
 	//Genetic properties
 	this.baseRadius = RNG(5,10); //Starting r
 	this.radius = this.baseRadius;		  //Current r
-	this.x = RNG(this.radius,canvas.width-this.radius);
-	this.y = RNG(this.radius,canvas.height-this.radius);
+	this.x = x || RNG(this.radius,canvas.width-this.radius);
+	this.y = y || RNG(this.radius,canvas.height-this.radius);
 	//Initial velocities (5 is quite fast)
 	this.vx = RNG(-3,3);  
 	this.vy = RNG(-3,3);
@@ -144,18 +151,17 @@ blorb = function(){
 	this.beatTimer = new Date().getTime();	//How often to pulsate
 	this.heart = 1;							//Requires delta for Blorb to function
 	this.hp = 100;							//Health level
-	this.energy = 20;						//Stored energy used for movement
-	this.gut = 100; 							//How much food in stomach
+	this.energy = 10;						//Stored energy used for movement
+	this.gut = 50; 							//How much food in stomach
 	this.CND= "UNKNOWN";					//Current status
 	this.foodTarget = null; 				//Reference to desired object
-	//Sniff circle properties
-	this.sniffing = false;
-	this.sniffRange = 50;
+	//Sniff 'radar' properties
+	this.sniffRange = 35;
 	this.sniffRadius = 0;
 	this.sniffAlpha = 1;
 	this.sniffSpeed = 1;
 	this.sniffTimer = new Date().getTime();
-	this.sniffInterval = RNG(1000,4000);
+	this.sniffInterval = RNG(2000,5000);
 	this.baseSniffInterval = this.sniffInterval;
 
 	//Check for collision vs other Blorbs
@@ -163,7 +169,6 @@ blorb = function(){
 		var me = blorbs.indexOf(this);  //Index of local blorb
 		for (var i = 0; i < blorbs.length; i++) {
 			var b = blorbs[i]
-
 			//If self, continue
 			if (me == i){continue};	
 			//If not near enough to collide, continue
@@ -174,12 +179,10 @@ blorb = function(){
 			{
 				continue;
 			}
-
 			//If actual circle collision fails, continue
 			if(!circleCollide(this.x,this.y,this.radius,b.x,b.y,b.radius)){
 				continue;
 			}
-
 			//Invert velocity upon collision
 			this.vx*=-1; this.vy*=-1;
 			b.vx*=-1; b.vy* -1;
@@ -187,8 +190,7 @@ blorb = function(){
 			b.x+=b.vx; b.y+=b.vy;
 			
 			/*Elastic collision:
-			var mass1 = this.radius*10;
-			var mass2 = b.radius*10;
+			var mass1 = this.radius*10;	var mass2 = b.radius*10;
 			this.vx = (this.vx * (mass1 - mass2) + (2 * mass2 * b.vx)) / (mass1 + mass2);
 			this.vy = (this.vy * (mass1 - mass2) + (2 * mass2 * b.vy)) / (mass1 + mass2);
 			b.vx = (b.vx * (mass2 - mass1) + (2 * mass1 * this.vx)) / (mass1 + mass2);
@@ -227,7 +229,6 @@ blorb = function(){
 			this.x = size;
 			this.vx*= -0.8;
 		}
-
 		if (this.y+size>canvas.height){
 			this.y = canvas.height-size;
 			this.vy*= -0.8;
@@ -250,28 +251,28 @@ blorb = function(){
 		this.vx = RNG(-2,2);
 		this.vy = RNG(-2,2);
 		//Consume energy based on velocity magnitude average
-		this.energy -= (this.vx+this.vy)/2;
+		this.energy -= (Math.abs(this.vx+this.vy)/2);
 	};
 
 	//Sniffs for nearby food pellets
 	this.sniff = function(time){
-		if(this.energy<=0 || this.foodTarget!= null){return;}
+		if(this.hp<=0 || this.foodTarget!= null){return;}
 		if (time<(this.sniffTimer+this.sniffInterval)){return};
 
-		if(this.condition == "HAPPY"){
+		if(this.CND == "HAPPY"){
 			this.sniffInterval = this.baseSniffInterval; 
-			this.sniffRange=50;
-			this.sniffSpeed = 1;
+			this.sniffRange=35;
+			this.sniffSpeed = 0.5;
 		};
-		if(this.condition == "HUNGRY"){
-			this.sniffInterval=RNG(500,2000); 
+		if(this.CND == "HUNGRY"){
+			this.sniffInterval=RNG(500,1000); 
 			this.sniffRange=100;
-			this.sniffSpeed = 2;
-		};
-		if(this.condition == "DYING"){
-			this.sniffInterval = RNG(100,300); 
-			this.sniffRange=150
 			this.sniffSpeed = 3;
+		};
+		if(this.CND == "DYING"){
+			this.sniffInterval = 0; 
+			this.sniffRange=150
+			this.sniffSpeed = RNG(3,5);
 		}
 
 		if (this.sniffRadius>this.sniffRange){
@@ -373,7 +374,6 @@ blorb = function(){
 		if(this.strokeClr.b < 255){
 			this.strokeClr.b +=1;
 		}
-
 	};
 
 	//Analyze condition of Blorb
@@ -387,10 +387,10 @@ blorb = function(){
 		if(this.gut>200){
 			this.CND = "FULL";
 		}
-		if(this.gut<=0){
+		if(this.gut<=0&this.energy<20){
 			this.CND="HUNGRY";
 		}
-		if(this.gut<=0&this.energy<=0){
+		if(this.gut<=0&this.hp<100){
 			this.CND="DYING";
 		}
 		if(this.hp<=0&this.energy<=0){
@@ -424,12 +424,11 @@ blorb = function(){
 	this.update = function(time){
 		if(this.arc>-2){this.draw();return;} //Let arc spin before beginning logic
 		//this.heartBeat();
-		
+		this.condition();
 		this.sniff(time);
-		this.nomf();
-		this.condition();		
-		this.move();
 		this.roam(time);
+		this.nomf();
+		this.move();
 		this.blorbCollide()
 		this.metabolize(time);
 		
@@ -442,11 +441,13 @@ blorb = function(){
 	//Render blorb
 	this.draw = function(){
 		//Draw sniffSpheres
-		c.lineWidth = 2;
-		c.strokeStyle = "rgba(255,255,255,"+this.sniffAlpha+")";
-		c.beginPath();
-		c.arc(this.x,this.y,this.sniffRadius,2*Math.PI,false);
-		c.stroke();
+		if (!this.CND=="DECEASED"){
+			c.lineWidth = 2;
+			c.strokeStyle = "rgba(255,255,255,"+this.sniffAlpha+")";
+			c.beginPath();
+			c.arc(this.x,this.y,this.sniffRadius,2*Math.PI,false);
+			c.stroke();
+		}
 
 		this.fat();
 		if (this.arc>-2){this.arc-=Math.random()*0.05}
@@ -460,7 +461,7 @@ blorb = function(){
 		if(this.arc<=-2){c.fill();}
 		c.stroke();
 	};
-}
+};
 
 
 
@@ -475,47 +476,28 @@ pellet = function(x,y){
 	var self = this;
 	this.x= x;
 	this.y= y;
-	this.nutrition = RNG(20,40,true); 		//Energy value provided
+	this.nutrition = RNG(30,40,true); 		//Energy value provided
 	var sizePercent = (this.nutrition/40)*5
 	this.w = sizePercent*2;
 	this.h = sizePercent;
-	this.alpha=0;
+	this.alpha=0
 	this.particles = [];					//Holds particles to be emitted
 
-	this.particle = function(){
-		this.life = RNG(100,200);
-		this.x = self.x;
-		this.y = self.y;
-		this.vx = RNG(-1,1);
-		this.vy = RNG(-1,1);
-		this.life= new 
-
-		this.update = function(){
-			this.x+=this.vx;
-			this.y+=this.vy;
-			c.fillRect(this.x-self.w/2,this.y-self.h/2,1,1);
-		}
-	}
-
-	for (var i = 0; i < 3; i++) {
-		//this.particles.push(new this.particle) //Currently laggy
-	};
-
 	this.update = function(){
-		if (this.alpha<1){this.alpha+=0.01;}
-		this.draw();
-
+		if (this.alpha<1){this.alpha+=0.04;}
+	
 		for (var i = 0; i < this.particles.length; i++) {
 			var p = this.particles[i];
 			p.update();
 		};
+		this.draw();
 	};
 
 	this.draw = function(){
-		c.fillStyle = "rgba(250,50,150,"+this.alpha+")";
+		c.fillStyle = "rgba(230,150,190,"+this.alpha+")";
 		c.fillRect(this.x-this.w/2,this.y-this.h/2,this.w,this.h);
 	};
-}
+};
 
 //Constantly keep food spawned around screen
 pelletSpawn = function(){
@@ -524,7 +506,10 @@ pelletSpawn = function(){
 			pellets.push(new pellet(RNG(50,canvas.width-50),RNG(50,canvas.height-50)) )
 		};		
 	}
-}
+};
+
+
+
 
 /*
 				Excrement Prototype
@@ -534,18 +519,34 @@ pelletSpawn = function(){
 poop = function(x,y,size){
 	this.x = x;
 	this.y = y;
+	this.vx= 0;
 	this.radius = size;
 	this.baseAlpha = RNG(0.5,1);
 	this.alpha= 0;
 	this.outline = RNG(0.5,2)
+
 	this.update = function(){
-		this.draw();
-		this.alpha += (this.baseAlpha - this.alpha)*0.02
-		this.baseAlpha-=0.001;
-		if (this.alpha<0){
-			poops.splice(poops.indexOf(this),1)
-			return
+		//Remove poop if 'decayed' or offscreen
+		if (this.alpha<0 || this.x>canvas.width){
+			poops.splice(poops.indexOf(this),1);
+			return;
 		}
+		//Fade poop into existence
+		if(this.baseAlpha>this.alpha){
+			this.alpha += (this.baseAlpha - this.alpha)*0.02
+		}
+		//'Decay' poop by decrementing alpha
+		this.baseAlpha-=0.001;
+		//Apply (simple) friction and velocity to poops
+		if(this.vx>0){
+			this.x+=this.vx;
+			this.vx-=0.1;
+		}
+		//Set poop x velocity on collision with sweeper to allow sweeping.
+		if(this.x<sweeper.x+sweeper.w&this.x>sweeper.x){
+			this.vx = sweeper.speed;
+		}
+		this.draw();
 	};
 
 	this.draw = function(){
@@ -557,8 +558,70 @@ poop = function(x,y,size){
 		c.fill();
 		c.stroke();		
 	};
-}
+};
 
+
+/*
+				Sweeper Entity
+		The sweeper is a bar that sweeps poops
+		away as it passes across the screen.
+*/
+sweeper = function(){
+	this.x = -10;
+	this.speed = 5;
+	this.w = 5;
+	this.active = true;
+
+	this.update = function(){
+		if (mouse.rClick){
+			this.x+=this.speed;
+			this.draw();
+		}
+		if(this.x>canvas.width+10){this.x=-10;}
+	}
+
+	this.draw = function(){
+		if(this.x<0){return};
+		c.fillStyle= "rgba(255,255,255,0.25)"
+		c.fillRect(this.x,0,this.w,canvas.height);
+
+	}
+}
+sweeper = new sweeper();
+
+
+
+/*
+					Player
+		Manages the input object that
+		can place entities into Puddle
+*/
+player = function(){
+	this.pelletInterval = 200;
+	this.spawnFlag = true;
+	this.pelletTimer = new Date().getTime();
+	this.update = function(time){
+		
+		//left-Click to create pellets
+		if(mouse.lClick & time>this.pelletTimer){
+			this.pelletTimer = time+this.pelletInterval;
+			if (pellets.length<200){
+				pellets.push(new pellet(mouse.x,mouse.y));
+			}
+		}
+
+		//Spawn a Blorb on middle-click; delimit to mouseDown
+		if(mouse.mClick){
+			if(this.spawnFlag & blorbs.length<50){blorbs.push(new blorb(mouse.x,mouse.y))}
+			this.spawnFlag=false;
+		}else{this.spawnFlag=true;}
+
+		if(mouse.lrClick){
+			blorbs = [];
+		}
+	}
+};
+player = new player();
 
 
 /*
@@ -566,6 +629,9 @@ poop = function(x,y,size){
 		Sets up the puddle with initialization 
 		of globals and initial Blorb creation.
 */
+blorbs = [];
+pellets = [];
+poops = [];
 
 for (var i = 0; i < 20; i++) {
 	blorbs.push(new blorb());
@@ -602,22 +668,22 @@ scanLines = function(){
 puddleUpdate = function(){
 	drawbG();
 	var time = new Date().getTime();
-
 	//Automatically spawn pellets?
 	pelletSpawn();
+
+	// Update Sweeper entity
+	sweeper.update();
 
 	/*Update poops*/
 	for (var i = poops.length - 1; i >= 0; i--) {
 		var poop = poops[i];
 		poop.update();
-
 	};
 
 	/*Update food pellets*/
 	for (var i = pellets.length - 1; i >= 0; i--) {
 		var p = pellets[i];
 		p.update();
-
 	};
 
 	/*Update Blorbs*/
@@ -637,13 +703,8 @@ puddleUpdate = function(){
 		}
 	};
 
-
-	//Click to create pellets
-	if(mouse.lClick){
-		if (pellets.length<100){
-			pellets.push(new pellet(mouse.x,mouse.y));
-		}
-	}
+	//Update player mouse interaction
+	player.update(time);
 	
 	scanLines();
 };
