@@ -71,6 +71,46 @@ RNG = function(min,max,int){
 	return RNG;
 };
 
+emitter = function(x,y,amount,decay){
+	this.particles = []
+	this.x=x; this.y=y;
+	this.active = false;
+	var self = this;
+	//Creates a particle and adds itself to list.
+	this.particle = function(x,y,decay){
+		this.decay = decay; 		 	//Fade rade
+		this.x=x; this.y=y; 		 	//Coords
+		this.alpha= -1; 	//Initial alpha
+		this.vx=Math.random()-0.5; this.vy=Math.random()-0.5;
+		this.update = function(){ //Update & draw the particle
+			this.alpha -= this.decay;
+			if(this.alpha>-0.9){
+				this.x+=this.vx; this.y-=this.vy;
+			}else{
+				this.alpha=1;
+				this.x = self.x; this.y = self.y;
+			}
+			c.fillStyle = "rgba(255,0,0,"+this.alpha+")";
+			c.fillRect(this.x,this.y-4,1,8);
+			c.fillRect(this.x-4,this.y,8,1);
+		}
+		self.particles.push(this);
+	};
+	this.update = function(){ 	//Update the Emitter
+		//c.fillRect(this.x,this.y-20,10,10);
+		if (!this.active){
+			for (var i = 0; i < this.particles.length; i++) {
+				this.particles[i].alpha=-1; return;
+			};
+		};
+		for (var i = 0; i < this.particles.length; i++) {
+			this.particles[i].update();
+		};
+	}
+	for (var i = 0; i < amount; i++) {this.particles.push(new this.particle(this.x,this.y,decay));}; //Init particles
+};
+
+
 
 
 /*
@@ -149,7 +189,7 @@ blorb = function(x,y){
 	this.rotInterval = 100;
 	//Health properties
 	this.hp = 100;							//Health level
-	this.energy = 10;						//Stored energy used for movement
+	this.energy = 20;						//Stored energy used for movement
 	this.gut = 50; 							//How much food in stomach
 	this.CND= "UNKNOWN";					//Current status
 	this.foodTarget = null; 				//Reference to desired object
@@ -161,6 +201,7 @@ blorb = function(x,y){
 	this.sniffTimer = new Date().getTime();
 	this.sniffInterval = RNG(2000,4000);
 	this.baseSniffInterval = this.sniffInterval;
+	this.emitter = new emitter(this.x,this.y,5,0.01)
 
 	//Check for collision vs other Blorbs
 	this.blorbCollide = function(){
@@ -246,7 +287,7 @@ blorb = function(x,y){
 
 		if(this.CND == "HAPPY"){
 			this.sniffInterval = this.baseSniffInterval; 
-			this.sniffRange=45;
+			this.sniffRange=50;
 			this.sniffSpeed = 1;
 		};
 		if(this.CND == "HUNGRY"){
@@ -345,10 +386,13 @@ blorb = function(x,y){
 		}
 
 		//Convert energy to HP when hurt
-		if(this.hp>100&this.energy>=3){
+		if(this.hp<100&this.energy>=10){
+			this.emitter.active = true;
 			this.hp+=RNG(10,20);
-			this.energy-=3;
+			this.energy-=2;
 			if(this.hp>100){this.hp=100;}
+		}else{
+			this.emitter.active = false;
 		}
 		this.energy = Math.floor(this.energy);
 	};
@@ -381,6 +425,9 @@ blorb = function(x,y){
 		}
 		if(this.gut>0&this.energy>0&this.hp>0){
 			this.CND="HAPPY";
+		}
+		if(this.gut>=2&this.energy>10&this.hp<100){
+			this.CND="HEALING";
 		}
 		if(this.gut>200){
 			this.CND = "FULL";
@@ -428,6 +475,10 @@ blorb = function(x,y){
 		this.move();
 		this.blorbCollide()
 		this.metabolize(time);
+		
+		this.emitter.x = this.x;
+		this.emitter.y = this.y;
+		this.emitter.update();
 		
 		if (this.CND ==="DECEASED"){
 			this.rot(time);
@@ -482,11 +533,13 @@ pellet = function(x,y){
 
 	this.update = function(){
 		if (this.alpha<1){this.alpha+=0.04;}
-	
+
 		for (var i = 0; i < this.particles.length; i++) {
 			var p = this.particles[i];
 			p.update();
 		};
+
+
 		this.draw();
 	};
 
@@ -534,7 +587,7 @@ poop = function(x,y,size){
 			this.alpha += (this.baseAlpha - this.alpha)*0.02
 		}
 		//'Decay' poop by decrementing alpha
-		this.baseAlpha-=0.001;
+		this.baseAlpha-=0.005;
 		//Apply (simple) friction and velocity to poops
 		if(this.vx>0){
 			this.x+=this.vx;
@@ -542,7 +595,7 @@ poop = function(x,y,size){
 		}
 		//Set poop x velocity on collision with sweeper to allow sweeping.
 		if(this.x<sweeper.x+sweeper.w&this.x>sweeper.x){
-			this.vx = sweeper.speed;
+			this.vx = sweeper.speed+2;
 		}
 		this.draw();
 	};
