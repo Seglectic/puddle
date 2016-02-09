@@ -148,8 +148,6 @@ blorb = function(x,y){
 	this.rotTimer = new Date().getTime();
 	this.rotInterval = 100;
 	//Health properties
-	this.beatTimer = new Date().getTime();	//How often to pulsate
-	this.heart = 1;							//Requires delta for Blorb to function
 	this.hp = 100;							//Health level
 	this.energy = 10;						//Stored energy used for movement
 	this.gut = 50; 							//How much food in stomach
@@ -197,21 +195,6 @@ blorb = function(x,y){
 			b.vy = (b.vy * (mass2 - mass1) + (2 * mass1 * this.vy)) / (mass1 + mass2);
 			*/
 		};
-	}
-
-	this.heartBeat = function(){
-		if(this.energy<=0){return false};
-		this.energy -= 0.01;
-		this.heart *= -1;
-
-		if(this.heart==1){
-			this.fillClr.r = 20;
-			this.fillClr.g = 200;
-		}else{
-			this.fillClr.r = 100;
-			this.fillClr.g = 150;
-		}
-		return true;
 	}
 
 	//Move blorb according to velocity
@@ -319,10 +302,8 @@ blorb = function(x,y){
 		var dx = (p.x - this.x)
 		var dy = (p.y - this.y)
 		var magnitude = Math.sqrt(dx*dx + dy*dy);
-		var scaleX = dx/magnitude;
-		var scaleY = dy/magnitude;
-		this.vx = scaleX * 3;
-		this.vy = scaleY * 3;
+		this.vx = dx/magnitude * 3;
+		this.vy = dy/magnitude * 3;
 	}
 
 	//Give blorb different proportions based on food levels
@@ -436,7 +417,6 @@ blorb = function(x,y){
 	//Blorb update logic
 	this.update = function(time){
 		if(this.arc>-2){this.draw();return;} //Let arc spin before beginning logic
-		//this.heartBeat();
 		this.condition();
 		this.sniff(time);
 		this.roam(time);
