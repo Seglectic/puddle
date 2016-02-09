@@ -285,6 +285,10 @@ blorb = function(x,y){
 	this.nomf = function(time){
 		//Consume pellet regardless if timer passed
 		if(this.foodTarget == null){return};
+		if(pellets.indexOf(this.foodTarget)==-1){
+			this.foodTarget=null;
+			return;
+		}
 		var p = this.foodTarget;
 		if(distance(p.x,p.y,this.x,this.y)<this.radius&this.energy>=1){
 			this.gut+=p.nutrition;
