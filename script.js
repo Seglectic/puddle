@@ -71,6 +71,13 @@ RNG = function(min,max,int){
 	return RNG;
 };
 
+codeName = function(){
+	var code = ['cute','sly','lone','rancid','dancing','psycho','awkward','quiet','loud','snapping','sea','blue','red','green','tiny','mini','cold','hot','hyper','mellow','tasty','nasty','kawaii','ultra']
+	var naem = ['Eagle','Owl','Rat','Leopard','Monkey','Snail','Turtle','Cactus','Eel','Salmon','Hedgehog','Bear','Wolf','Coyote','Ox','Frog','Octopus','Squid','Okapi','Ant','Narwhal','Crab','Shrimp','Cicada','Moth','Cobra','Mantis','Viper','Osprey','Pig','Blorb'] 
+	return code[Math.floor(Math.random()*code.length)]+naem[Math.floor(Math.random()*naem.length)];
+}
+
+//Creates a '+' particle emitter for healing Blorbs
 emitter = function(x,y,amount,decay){
 	this.particles = []
 	this.x=x; this.y=y;
@@ -88,6 +95,7 @@ emitter = function(x,y,amount,decay){
 				this.x+=this.vx; this.y-=this.vy;
 			}else{
 				this.alpha=1;
+				this.vx=Math.random()-0.5; this.vy=Math.random()-0.5;
 				this.x = self.x; this.y = self.y;
 			}
 			c.fillStyle = "rgba(255,0,0,"+this.alpha+")";
@@ -107,7 +115,7 @@ emitter = function(x,y,amount,decay){
 			this.particles[i].update();
 		};
 	}
-	for (var i = 0; i < amount; i++) {this.particles.push(new this.particle(this.x,this.y,decay));}; //Init particles
+	for (var i = 0; i < amount; i++) {this.particles.push(new this.particle(this.x,this.y,decay));}; //Populate local particle array
 };
 
 
@@ -163,6 +171,8 @@ mouse();
 		dying are their main past-times.
 */
 blorb = function(x,y){
+
+	this.name = codeName();
 	//Genetic properties
 	this.baseRadius = RNG(5,10); //Starting r
 	this.radius = this.baseRadius;		  //Current r
@@ -285,7 +295,7 @@ blorb = function(x,y){
 		if(this.hp<=0 || this.foodTarget!= null){return;}
 		if (time<(this.sniffTimer+this.sniffInterval)){return};
 
-		if(this.CND == "HAPPY"){
+		if(this.CND == "HAPPY" || this.CND == "HEALING"){
 			this.sniffInterval = this.baseSniffInterval; 
 			this.sniffRange=50;
 			this.sniffSpeed = 1;
@@ -423,10 +433,10 @@ blorb = function(x,y){
 		if(this.energy<=0){
 			this.CND = "TIRED";
 		}
-		if(this.gut>0&this.energy>0&this.hp>0){
+		if(this.gut>0&this.energy>0&this.hp>30){
 			this.CND="HAPPY";
 		}
-		if(this.gut>=2&this.energy>10&this.hp<100){
+		if(this.gut>0&this.energy>0&this.hp<100){
 			this.CND="HEALING";
 		}
 		if(this.gut>200){
@@ -454,7 +464,7 @@ blorb = function(x,y){
 		else{var x = this.x-(this.radius)-120}
 		c.fillStyle = "White";
 		c.font = (fontSize+"px Lucida Console")
-		var name = "Blorb #"+blorbs.indexOf(this)+" ["+this.CND+"]";
+		var name = "Blorb: "+this.name+" ["+this.CND+"]";
 		var energy = "Energy: "+Math.floor(this.energy);
 		//var energy = "POS: "+this.x+' '+this.y;
 		var hp = "Health: "+Math.floor(this.hp);
@@ -583,11 +593,12 @@ poop = function(x,y,size){
 			return;
 		}
 		//Fade poop into existence
-		if(this.baseAlpha>this.alpha){
+		//if(this.baseAlpha>this.alpha){
 			this.alpha += (this.baseAlpha - this.alpha)*0.02
-		}
+		//}
+		
 		//'Decay' poop by decrementing alpha
-		this.baseAlpha-=0.005;
+		this.baseAlpha-=0.001;
 		//Apply (simple) friction and velocity to poops
 		if(this.vx>0){
 			this.x+=this.vx;
@@ -648,7 +659,7 @@ sweeper = new sweeper();
 		can place entities into Puddle
 */
 player = function(){
-	this.pelletInterval = 200;
+	this.pelletInterval = 100;
 	this.spawnFlag = true;
 	this.pelletTimer = new Date().getTime();
 	this.update = function(time){
@@ -669,6 +680,7 @@ player = function(){
 
 		if(mouse.lrClick){
 			blorbs = [];
+			pellets = [];
 		}
 	}
 };
