@@ -64,7 +64,7 @@ circleCollide = function(x1,y1,r1,x2,y2,r2){
 	else{return false;}
 }
 
-//Random range from min-max, bool int if rounding
+//Random range from [min] to [max], bool [int] if rounding
 RNG = function(min,max,int){
 	var RNG = (Math.random()*(max-min))+min;
 	if (int){RNG = Math.floor(RNG);}
@@ -164,7 +164,7 @@ mouse();
 
 
 
-/*
+/*__________________________________________________________________________________________________________________________________________________________________________________________________________________
 				Blorb Object Prototype
 		These are the main characters of puddle;
 		roaming about, eating food, shitting and
@@ -290,7 +290,7 @@ blorb = function(x,y){
 		this.energy -= (Math.abs(this.vx+this.vy)/2);
 	};
 
-	//Sniffs for nearby food pellets
+	//Sniffs for nearby food shrimps
 	this.sniff = function(time){
 		if(this.hp<=0 || this.foodTarget!= null){return;}
 		if (time<(this.sniffTimer+this.sniffInterval)){return};
@@ -319,11 +319,11 @@ blorb = function(x,y){
 		this.sniffRadius += this.sniffSpeed;
 		this.sniffAlpha = (1-(this.sniffRadius/this.sniffRange))*0.4;
 
-		for (var i = pellets.length - 1; i >= 0; i--) {
-			var p = pellets[i];
-			var dist = distance(p.x,p.y,this.x,this.y)
+		for (var i = shrimps.length - 1; i >= 0; i--) {
+			var s = shrimps[i];
+			var dist = distance(s.x,s.y,this.x,this.y)
 			if(dist<this.sniffRadius){ 
-				this.foodTarget = p;
+				this.foodTarget = s;
 				this.sniffTimer = time;
 				this.sniffAlpha = 1;
 				this.sniffRadius = 0;
@@ -334,16 +334,16 @@ blorb = function(x,y){
 
 	//Move toward food if located
 	this.nomf = function(time){
-		//Consume pellet regardless if timer passed
+		//Consume shrimp regardless if timer passed
 		if(this.foodTarget == null){return};
-		if(pellets.indexOf(this.foodTarget)==-1){
+		if(shrimps.indexOf(this.foodTarget)==-1){
 			this.foodTarget=null;
 			return;
 		}
-		var p = this.foodTarget;
-		if(distance(p.x,p.y,this.x,this.y)<this.radius&this.energy>=1){
-			this.gut+=p.nutrition;
-			pellets.splice(pellets.indexOf(p),1);
+		var s = this.foodTarget;
+		if(distance(s.x,s.y,this.x,this.y)<this.radius&this.energy>=1){
+			this.gut+=s.nutrition;
+			shrimps.splice(shrimps.indexOf(s),1);
 			this.foodTarget=null;
 		}
 
@@ -354,8 +354,8 @@ blorb = function(x,y){
 		this.roamTimer = time;
 
 		//Calculate velocity vector
-		var dx = (p.x - this.x)
-		var dy = (p.y - this.y)
+		var dx = (s.x - this.x)
+		var dy = (s.y - this.y)
 		var magnitude = Math.sqrt(dx*dx + dy*dy);
 		this.vx = dx/magnitude * 3;
 		this.vy = dy/magnitude * 3;
@@ -364,7 +364,7 @@ blorb = function(x,y){
 	//Give blorb different proportions based on food levels
 	this.fat = function(){
 		var fat = this.baseMembrane * (this.energy/50) 
-		var nucleus = this.baseRadius*(this.gut/100)+5
+		var nucleus = this.baseRadius*(this.gut/100)+3
 		if(nucleus<5){nucleus=5;}
 		if(fat<3){fat=3;}
 		this.membrane += fat-this.membrane;
@@ -524,57 +524,103 @@ blorb = function(x,y){
 
 
 
-/*
-					Edible Food Pellet Prototype
-		Blorbs love these! Each food object has a nutrition
+/*__________________________________________________________________________________________________________________________________________________________________________________________________________________
+					Edible Shrimp Prototype
+		Blorbs love these! Each shrimp has a nutrition
 		attribute that goes toward fueling blorb activity.
 */
 
-pellet = function(x,y){
-	var self = this;
-	this.x= x;
-	this.y= y;
-	this.nutrition = RNG(30,40,true); 		//Energy value provided
-	var sizePercent = (this.nutrition/40)*5
-	this.w = sizePercent*2;
-	this.h = sizePercent;
-	this.alpha=0
-	this.particles = [];					//Holds particles to be emitted
+shrimps = [];
 
-	this.update = function(){
-		if (this.alpha<1){this.alpha+=0.04;}
+var shrimp = function(x,y){
+	this.x = x||canvas.width/2; this.y = y||canvas.height/2;
+	this.nutrition = RNG(30,40,true); //Energy value provided
+	this.width = 4;
+	this.height = 4;
+	this.px1 = Math.random()*10; this.py1 = Math.random()*10;
+	this.px2 = Math.random()*10; this.py2 = Math.random()*10;
+	this.vx = 0; this.vy = 0;
+	this.vTimer = new Date().getTime();
+	this.vInterval = RNG(400,600,true);
+	this.tailX = x+RNG(-50,50)||canvas.width/2; this.tailY = y+RNG(-50,50)||canvas.height/2;
+	this.color = "rgb(195,150,200)";
+	this.tailColor = "rgb(207,87,87)";
 
-		for (var i = 0; i < this.particles.length; i++) {
-			var p = this.particles[i];
-			p.update();
-		};
-
-
-		this.draw();
-	};
-
-	this.draw = function(){
-		c.fillStyle = "rgba(230,150,190,"+this.alpha+")";
-		c.fillRect(this.x-this.w/2,this.y-this.h/2,this.w,this.h);
-	};
-};
-
-//Constantly keep food spawned around screen
-pelletSpawn = function(){
-	if (pellets.length<=5){
-		for (var i = 0; pellets.length < 20; i++) {
-			pellets.push(new pellet(RNG(50,canvas.width-50),RNG(50,canvas.height-50)) )
-		};		
+	//Check for wall collisions and bounce
+	this.wallCollide = function(){
+		if (this.x>canvas.width-this.width){this.vx=0;this.x-=1;this.veloGet();};
+		if (this.x<this.width){this.vx=0;this.x+=1;this.veloGet();}
+		if (this.y>canvas.height-this.height){this.vy=0;this.y-=1;this.veloGet();};
+		if (this.y<this.height){this.vy=0;this.y+=1;this.veloGet();}
 	}
+	
+	//Get a new velocity for the scrimp
+	this.veloGet = function(time){
+		if(time<(this.vTimer+this.vInterval)){return};
+		this.vTimer = time;
+		var i = 0.08
+		this.px1 += i;
+		this.py1 += i;
+		this.px2 += i;
+		this.py2 += i;
+		this.vx = noise.perlin2(this.px1,this.px2);
+		this.vy = noise.perlin2(this.py1,this.py2);
+	}
+	
+	//Update logic and draw ent
+	this.update = function(time){
+		this.veloGet(time);
+		//Make tail follow shrimp
+		this.tailX += (this.x - this.tailX)*0.2;
+		this.tailY += (this.y - this.tailY)*0.2;
+		this.wallCollide();
+		//Increment velocity
+		this.x += this.vx*2;
+		this.y += this.vy*2;
+		this.draw();
+	}
+	
+	//Manages how ent is drawn
+	this.draw = function(){
+		//Draw connecting line
+		c.strokeStyle = this.tailColor;
+		c.lineWidth = 1;
+		c.beginPath();
+		c.moveTo(this.x,this.y);
+		c.lineTo(this.tailX,this.tailY);
+		c.stroke();
+		//Draw Tail
+		c.fillStyle = this.tailColor;
+		c.fillRect(this.tailX-(this.width/4),this.tailY-(this.height/4),this.width/2,this.height/2)
+		//Draw Body
+		c.fillStyle = this.color;
+		c.fillRect(this.x-(this.width/2),this.y-(this.height/2),this.width,this.height)
+	}
+	shrimps.push(this);
+};
+
+for (var i = 0; i < 20; i++) {
+	new shrimp();
+}
+
+
+//Constantly keep shrimp spawned
+shrimpSpawn = function(){
+	if (shrimps.length<=5){
+		for (var i = 0; shrimps.length < 20; i++) {
+			new shrimp();
+		};		
+	};
 };
 
 
 
 
-/*
+
+/*__________________________________________________________________________________________________________________________________________________________________________________________________________________
 				Excrement Prototype
 		Blorbs excrete these objects when they
-		metabolize food pellets into energy.
+		metabolize food shrimps into energy.
 */
 poop = function(x,y,size){
 	this.x = x;
@@ -623,7 +669,7 @@ poop = function(x,y,size){
 };
 
 
-/*
+/*__________________________________________________________________________________________________________________________________________________________________________________________________________________
 				Sweeper Entity
 		The sweeper is a bar that sweeps poops
 		away as it passes across the screen.
@@ -653,22 +699,22 @@ sweeper = new sweeper();
 
 
 
-/*
+/*__________________________________________________________________________________________________________________________________________________________________________________________________________________
 					Player
 		Manages the input object that
 		can place entities into Puddle
 */
 player = function(){
-	this.pelletInterval = 100;
+	this.shrimpInterval = 100;
 	this.spawnFlag = true;
-	this.pelletTimer = new Date().getTime();
+	this.shrimpTimer = new Date().getTime();
 	this.update = function(time){
 		
-		//left-Click to create pellets
-		if(mouse.lClick & time>this.pelletTimer){
-			this.pelletTimer = time+this.pelletInterval;
-			if (pellets.length<200){
-				pellets.push(new pellet(mouse.x,mouse.y));
+		//left-Click to create shrimps
+		if(mouse.lClick & time>this.shrimpTimer){
+			this.shrimpTimer = time+this.shrimpInterval;
+			if (shrimps.length<200){
+				new shrimp(mouse.x,mouse.y);
 			}
 		}
 
@@ -679,21 +725,21 @@ player = function(){
 		}else{this.spawnFlag=true;}
 
 		if(mouse.lrClick){
-			blorbs = [];
-			pellets = [];
+			//blorbs = [];
+			shrimps = [];
 		}
 	}
 };
 player = new player();
 
 
-/*
+/*__________________________________________________________________________________________________________________________________________________________________________________________________________________
 					PUDDLE SETUP
 		Sets up the puddle with initialization 
 		of globals and initial Blorb creation.
 */
 blorbs = [];
-pellets = [];
+shrimps = []
 poops = [];
 
 for (var i = 0; i < 20; i++) {
@@ -723,16 +769,15 @@ scanLines = function(){
 }
 
 
-/*
+/*__________________________________________________________________________________________________________________________________________________________________________________________________________________
 					MAIN GAME UPDATE LOOP
 			All magic called from this function
 */
 
 puddleUpdate = function(){
 	drawbG();
+	shrimpSpawn();
 	var time = new Date().getTime();
-	//Automatically spawn pellets?
-	pelletSpawn();
 
 	// Update Sweeper entity
 	sweeper.update();
@@ -742,12 +787,11 @@ puddleUpdate = function(){
 		var poop = poops[i];
 		poop.update();
 	};
-
-	/*Update food pellets*/
-	for (var i = pellets.length - 1; i >= 0; i--) {
-		var p = pellets[i];
-		p.update();
-	};
+	
+	/*Update shrimps*/
+	for (var i = 0; i < shrimps.length; i++) {
+		shrimps[i].update(time);
+	}
 
 	/*Update Blorbs*/
 	for (var i = blorbs.length - 1; i >= 0; i--) {
@@ -765,6 +809,7 @@ puddleUpdate = function(){
 			c.stroke();
 		}
 	};
+
 
 	//Update player mouse interaction
 	player.update(time);
