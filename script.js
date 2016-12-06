@@ -539,10 +539,10 @@ var shrimp = function(x,y){
 	this.height = 4;
 	this.px1 = Math.random()*10; this.py1 = Math.random()*10;
 	this.px2 = Math.random()*10; this.py2 = Math.random()*10;
-	this.vx = 0; this.vy = 0;
+	this.vx = RNG(-1,1); this.vy = RNG(-1,1);
 	this.vTimer = new Date().getTime();
 	this.vInterval = RNG(400,600,true);
-	this.tailX = x+RNG(-50,50)||canvas.width/2; this.tailY = y+RNG(-50,50)||canvas.height/2;
+	this.tailX = this.x; this.tailY = this.y;
 	this.color = "rgb(195,150,200)";
 	this.tailColor = "rgb(207,87,87)";
 
