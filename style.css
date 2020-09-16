@@ -5,3 +5,8 @@ body{
 	font-family:monospace, courier;
 	color:white;
 }
+
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+}
