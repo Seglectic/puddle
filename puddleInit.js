@@ -34,6 +34,21 @@ PDL.canvas.width  = window.innerWidth-10;
 PDL.ctx           = PDL.canvas.getContext("2d");
 document.body.appendChild(PDL.canvas);
 
+// Puddle width & height in pixels
+PDL.width    = 4000;
+PDL.height   = 4000;
+//Center of map
+PDL.origin   = {x:PDL.width/2, y:PDL.height/2};
+//Camera render offsets (Centered)
+PDL.camX     = PDL.origin.x - (PDL.canvas.width/2);
+PDL.camY     = PDL.origin.y - (PDL.canvas.height/2);
+// Camera destination for smooth mvmt
+PDL.camDX    = PDL.camX;
+PDL.camDY    = PDL.camY;
+PDL.camSpeed = 20;
+
+
+
 //Disable right-click context menu
 PDL.canvas.oncontextmenu = function (e) {e.preventDefault();};
 
@@ -60,9 +75,19 @@ PDL.pointRectCollide = function(px,py,x,y,w,h){
 	if(px>x&px<x+w&py>y&py<y+h){return true;}
 };
 
-/**
- * Return 2D distance
- */
+// Check if two shrektangles are colliding
+PDL.rectCollide = function(x1,y1,w1,h1,x2,y2,w2,h2){
+   if(
+		x1 < x2 + w2 &&
+		x1 + w1 > x2 &&
+		y1 < y2 + h2 &&
+		y1 + h1 > y2){
+		return true
+   }
+}
+
+
+//  Return 2D distance
 PDL.distance = function(x1,y1,x2,y2){
 	var d = Math.sqrt( ((x2-x1)*(x2-x1)) + ((y2-y1)*(y2-y1)) );
 	return d;
