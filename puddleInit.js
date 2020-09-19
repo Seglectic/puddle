@@ -35,8 +35,8 @@ PDL.ctx           = PDL.canvas.getContext("2d");
 document.body.appendChild(PDL.canvas);
 
 // Puddle width & height in pixels
-PDL.width    = 4000;
-PDL.height   = 4000;
+PDL.width    = 800;
+PDL.height   = 800;
 //Center of map
 PDL.origin   = {x:PDL.width/2, y:PDL.height/2};
 //Camera render offsets (Centered)
@@ -46,6 +46,9 @@ PDL.camY     = PDL.origin.y - (PDL.canvas.height/2);
 PDL.camDX    = PDL.camX;
 PDL.camDY    = PDL.camY;
 PDL.camSpeed = 20;
+//Holds current time for timers/frame delta
+PDL.time = Date.now();
+PDL.lastTime = PDL.time;
 
 
 

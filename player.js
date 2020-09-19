@@ -11,10 +11,14 @@ PDL.player = {
 		if(PDL.gPad.down ){PDL.camDY+=PDL.camSpeed;}	
 		if(PDL.gPad.left ){PDL.camDX-=PDL.camSpeed;}	
 		if(PDL.gPad.right){PDL.camDX+=PDL.camSpeed;}	
+
+			//left-Click to create shrimps
+		if(PDL.mouse.lClick){;
+			new PDL.shrimp(PDL.mouse.worldX,PDL.mouse.worldY,PDL.mouse.vx,PDL.mouse.vy); 
+			// console.log("meow")
+		}
 	}
-
 }
-
 
 
 
@@ -33,13 +37,7 @@ PDL.player = {
 // 	this.shrimpTimer = new Date().getTime();
 // 	this.update = function(time){
 		
-// 		//left-Click to create shrimps
-// 		if(mouse.lClick & time>this.shrimpTimer){
-// 			this.shrimpTimer = time+this.shrimpInterval;
-// 			if (shrimps.length<200){
-// 				new shrimp(mouse.x,mouse.y,mouse.vx,mouse.vy); 
-// 			}
-// 		}
+
 
 // 		//Spawn a Blorb on middle-click; delimit to mouseDown
 // 		if(mouse.mClick){

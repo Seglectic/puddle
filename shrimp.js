@@ -1,15 +1,21 @@
-/*______________________________________________________________
-					Edible Shrimp Prototype
-		Blorbs love these! Each shrimp has a nutrition
-		attribute that goes toward fueling blorb activity.
-*/
 
 
 
+            // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+            // ┃              Shrimp                     ┃
+            // ┃                                         ┃
+            // ┃  The smallest creatures living in the   ┃
+            // ┃  puddle. These provide the necessary    ┃
+            // ┃  nutrients for bigger critters as well  ┃
+            // ┃  as some visual flair through activity. ┃
+            // ┃                                         ┃
+            // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+			//TODO Create a critter prototype using the shrimp as a base to reuse?
 PDL.shrimp = function(x,y,vx,vy){
 	
-	this.x         = PDL.origin.x + PDL.RNG(-1,1) || x;
-	this.y         = PDL.origin.y + PDL.RNG(-1,1) || y;
+	this.x         = x || PDL.origin.x + PDL.RNG(-1,1);
+	this.y         = y || PDL.origin.y + PDL.RNG(-1,1);
 	this.nutrition = PDL.RNG(30,40,true); //Energy value provided
 	this.width     = 4;
 	this.height    = 4;
@@ -21,7 +27,7 @@ PDL.shrimp = function(x,y,vx,vy){
 	this.vInterval = PDL.RNG(400,600,true);
 	this.tailX     = this.x; 
 	this.tailY     = this.y;
-	this.chunk 	   = PDL.chunks[Math.floor(this.y / PDL.chunkSize)][Math.floor(this.x / PDL.chunkSize)];
+	this.chunk 	   = PDL.chunkPt(this.x,this.y)
 	this.lastChunk = this.chunk;
 	
 	this.chunk.shrimps.push(this) //Push self to chunk for iterating
@@ -34,12 +40,14 @@ PDL.shrimp = function(x,y,vx,vy){
 		this.color = `rgb(${PDL.RNG(150,255)},150,200)`:
 		this.color = `rgb(${PDL.RNG(100,150)},150,${PDL.RNG(200,255)})`;
 
-	//Check for wall collisions and bounce
+	//Check for wall collisions and bounce 
+	//NOTE Giving activating on maximum x and y chunk for some reason? Also need strict collisions to not exceed main map or no chunk will update them
+	//FIXME T
 	this.wallCollide = function(){
-		if (this.x>PDL.width-this.width){this.vx=0;this.x-=1;this.veloGet();};
-		if (this.x<this){this.vx=0;this.x+=1;this.veloGet();}
-		if (this.y>PDL.height-this.height){this.vy=0;this.y-=1;this.veloGet();};
-		if (this.y<this.height){this.vy=0;this.y+=1;this.veloGet();}
+		if (this.x>PDL.width-this.width  ){this.vx=0;this.x-=1;this.veloGet();}
+		if (this.x<this                  ){this.vx=0;this.x+=1;this.veloGet();}
+		if (this.y>PDL.height-this.height){this.vy=0;this.y-=1;this.veloGet();}
+		if (this.y<this.height           ){this.vy=0;this.y+=1;this.veloGet();}
 	}
 	
 	//Get a new velocity for the scrimp
@@ -58,23 +66,15 @@ PDL.shrimp = function(x,y,vx,vy){
 	//Update logic and draw ent
 	this.update = function(time){
 
-		//TODO This chunk stuff is ugly and needs to be reusable
-		//Place self into active chunk 
-		this.chunk = PDL.chunks[Math.floor(this.y / PDL.chunkSize)][Math.floor(this.x / PDL.chunkSize)];
+		this.chunk = PDL.chunkPt(this.x,this.y)
 
-		if(this.lastChunk!=PDL.chunks[Math.floor(this.y / PDL.chunkSize)][Math.floor(this.x / PDL.chunkSize)]){ //Remove from prior chunk (if different)
-			
+		//Place self into active chunk 
+		if(this.lastChunk!=this.chunk){ //Remove from prior chunk (if different)		
 			var removeIndex = this.lastChunk.shrimps.indexOf(this);
-			console.log(removeIndex)
 			this.lastChunk.shrimps.splice(removeIndex,1);
 			this.lastChunk = this.chunk;
-			this.lastChunk=this.chunk;
-
 			this.chunk.shrimps.push(this)
 		}
-
-
-
 
 		this.veloGet(time);
 		//Make tail follow shrimp
@@ -103,19 +103,10 @@ PDL.shrimp = function(x,y,vx,vy){
 		PDL.ctx.fillStyle = this.color;
 		PDL.ctx.fillRect(this.x-(this.width/2)-PDL.camX,this.y-(this.height/2)-PDL.camY,this.width,this.height)
 	}
-	PDL.shrimps.push(this);
+
 };
 
-// //Constantly keep shrimp spawned
-// shrimpSpawn = function(){
-// 	if (shrimps.length<=5){
-// 		for (var i = 0; shrimps.length < 20; i++) {
-// 			new shrimp();
-// 		};		
-// 	};
-// };
-
 // Spawn shrimp
-for (let i = 0; i < 1000; i++) {
+for (let i = 0; i < 10; i++) {
     new PDL.shrimp()
 }
