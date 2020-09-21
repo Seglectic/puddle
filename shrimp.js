@@ -16,8 +16,8 @@
 PDL.shrimp = function(x,y,vx,vy){
 	this.x         = x || PDL.origin.x + PDL.RNG(-PDL.chunkSize/2,PDL.chunkSize/2);
 	this.y         = y || PDL.origin.y + PDL.RNG(-PDL.chunkSize/2,PDL.chunkSize/2);
-	this.vx        = vx || PDL.RNG(-1,1); 
-	this.vy        = vy || PDL.RNG(-1,1);
+	this.vx        = PDL.clamp(vx,-1,1) || PDL.RNG(-1,1); 
+	this.vy        = PDL.clamp(vy,-1,1) || PDL.RNG(-1,1);
 	this.px1       = Math.random()*10; this.py1 = Math.random()*10;
 	this.px2       = Math.random()*10; this.py2 = Math.random()*10;
 	this.prevX     = this.y;
@@ -70,15 +70,14 @@ PDL.shrimp = function(x,y,vx,vy){
 	//Update logic and draw ent
 	this.update = function(time){
 
-		this.chunk = PDL.chunkPt(this.x,this.y)
-
 		//Place self into active chunk 
+		this.chunk = PDL.chunkPt(this.x,this.y)
 		if(this.lastChunk!=this.chunk){ //Remove from prior chunk (if different)		
 			var removeIndex = this.lastChunk.ents.indexOf(this);
 			this.lastChunk.ents.splice(removeIndex,1);
 			this.lastChunk = this.chunk;
 			this.chunk.ents.push(this)
-		}
+        }
 
 		this.veloGet(time);
 		//Make tail follow shrimp
@@ -113,6 +112,6 @@ PDL.shrimp = function(x,y,vx,vy){
 };
 
 // Spawn shrimp
-for (let i = 0; i < 50; i++) {
+for (let i = 0; i < 5; i++) {
     new PDL.shrimp()
 }

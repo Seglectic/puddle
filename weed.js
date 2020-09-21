@@ -33,6 +33,7 @@ PDL.weed = function(x,y,vx,vy){
     this.update = function(){
         
         //Place self into active chunk 
+        this.chunk = PDL.chunkPt(this.x,this.y)
 		if(this.lastChunk!=this.chunk){ //Remove from prior chunk (if different)		
 			var removeIndex = this.lastChunk.ents.indexOf(this);
 			this.lastChunk.ents.splice(removeIndex,1);
@@ -83,7 +84,9 @@ PDL.weed = function(x,y,vx,vy){
     
         PDL.ctx.beginPath();
         PDL.ctx.arc(worldX,worldY,this.radius,0,2*Math.PI)
+        PDL.ctx.fill();
         PDL.ctx.arc(worldX+this.pad1X,worldY+this.pad1Y,this.radius,0,2*Math.PI)
+        PDL.ctx.fill();
         PDL.ctx.arc(worldX+this.pad2X,worldY+this.pad2Y,this.radius,0,2*Math.PI)
         // PDL.ctx.arc(worldX+(this.radius*0.8),worldY-(this.radius*0.8),this.radius,0,2*Math.PI)
         PDL.ctx.fill();

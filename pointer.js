@@ -15,7 +15,6 @@ PDL.mouse = {
 	lrClick: false
 }
 
-
 	PDL.mouse.mouseMove = function(e){
 		var env          = PDL.canvas.getBoundingClientRect();
 		PDL.mouse.x      = e.clientX-env.left;
@@ -51,3 +50,20 @@ addEventListener('mousemove',PDL.mouse.mouseMove)
 addEventListener('mousedown',PDL.mouse.mouseDown);
 addEventListener('mouseup'  ,PDL.mouse.mouseUp);
 
+
+
+//Handles touch events
+
+PDL.touch = {
+	start:()=>{
+
+	},
+
+	move:()=>{
+
+	},
+
+	end:()=>{
+		
+	}
+}
