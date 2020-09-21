@@ -13,7 +13,7 @@
 
 //Draw puddle background
 PDL.drawbG = function(){
-    PDL.ctx.fillStyle= "rgba(50,50,100,0.5)";
+    PDL.ctx.fillStyle= "rgba(50,50,100,0.9)";
     PDL.ctx.fillRect(0,0,PDL.canvas.width,PDL.canvas.height);
     //TODO Add central gradient?
         /*var grd = ctx.createRadialGradient(75,50,5,90,60,100);
@@ -52,10 +52,10 @@ PDL.cameraUpdate = function(){
 					Main Game Loop
 */
 //TODO maybe abstract this elsewhere? 
-//TODO Use frame delta for other timers
+
 PDL.timeEnd=Date.now();
 
-puddleUpdate = function(){
+PDL.puddleUpdate = function(){
     PDL.timeStart = Date.now();
     var delta = Math.abs( PDL.timeEnd - PDL.timeStart );
     
@@ -64,9 +64,8 @@ puddleUpdate = function(){
 
     PDL.player.update(delta);
 
-    PDL.crunchChunks(PDL.timeStart);
+    PDL.crunchChunks(PDL.timeStart); //TODO Convert crunching to frame delta
 
-    
     PDL.fps.draw(delta);
     PDL.scanLines();
     PDL.timeEnd = PDL.timeStart;
@@ -74,4 +73,21 @@ puddleUpdate = function(){
 };
 
 
-setInterval(puddleUpdate,16.6667);
+//FIXME Pretty sure there's a more elegant way to set the updateBuffer callback or change the callback within a setInterval. Maybe check optiwink or similar game
+PDL.titleScreen = function(){
+    PDL.drawbG();
+    PDL.scanLines();
+
+    if(PDL.mouse.lClick){
+        clearInterval(PDL.updateBuffer);
+        PDL.updateBuffer = setInterval(PDL.puddleUpdate,16.6667);
+    }
+    
+}
+
+PDL.updateBuffer = PDL.titleScreen;
+
+
+
+
+PDL.updateBuffer = setInterval(PDL.titleScreen,16.6667);

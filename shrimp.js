@@ -12,7 +12,7 @@
             // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 			//TODO Create a critter prototype using the shrimp as a base to reuse?
-			//TODO Keep functions 
+			//TODO Have shrimp munch on weeds
 PDL.shrimp = function(x,y,vx,vy){
 	this.x         = x || PDL.origin.x + PDL.RNG(-PDL.chunkSize/2,PDL.chunkSize/2);
 	this.y         = y || PDL.origin.y + PDL.RNG(-PDL.chunkSize/2,PDL.chunkSize/2);
@@ -26,6 +26,7 @@ PDL.shrimp = function(x,y,vx,vy){
 	this.width     = 4;
 	this.height    = 4;
 
+	//TODO Convert update to use frame delta
 	this.vTimer    = new Date().getTime();
 	this.vInterval = PDL.RNG(400,600,true);
 	this.tailX     = this.x; 
@@ -55,6 +56,7 @@ PDL.shrimp = function(x,y,vx,vy){
 	}
 	
 	//Get a new velocity for the scrimp
+	//TODO Convert update to use frame delta
 	this.veloGet = function(time){
 		if(time<(this.vTimer+this.vInterval)){return};
 		this.vTimer = time;
@@ -68,6 +70,7 @@ PDL.shrimp = function(x,y,vx,vy){
 	}
 	
 	//Update logic and draw ent
+	//TODO Convert update to use frame delta
 	this.update = function(time){
 
 		//Place self into active chunk 

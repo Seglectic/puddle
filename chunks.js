@@ -110,6 +110,12 @@ PDL.activeChunks = function(){
 }
 
 
+//TODO Create routine to get adjacent chunks 
+//NOTE Most important ^
+PDL.adjacentChunks = function(){
+
+}
+
 //Iterate and update  all active chunks         
 PDL.crunchChunks = function(time){
     var active = PDL.activeChunks()

@@ -2,7 +2,7 @@
     // ┃              Wyrm                ┃
     // ┃                                  ┃
     // ┃  Wyrms feast on shrimp and like  ┃
-    // ┃  to wiggly around making sounds  ┃
+    // ┃  to wiggle around making sounds  ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
     //TODO set these up?
