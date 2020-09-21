@@ -115,7 +115,7 @@ PDL.crunchChunks = function(time){
     var active = PDL.activeChunks()
     active.forEach(chunkRow => {
         chunkRow.forEach(chunk =>{
-            chunk.draw();
+            // chunk.draw();
 
             chunk.update(time);
 

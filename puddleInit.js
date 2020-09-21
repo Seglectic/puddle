@@ -29,8 +29,8 @@ PDL = {};
 
 PDL.canvas        = document.createElement("canvas");
 PDL.canvas.id     = "puddleCanvas";
-PDL.canvas.height = window.innerHeight-10;
-PDL.canvas.width  = window.innerWidth-10;
+PDL.canvas.height = window.innerHeight;
+PDL.canvas.width  = window.innerWidth;
 PDL.ctx           = PDL.canvas.getContext("2d");
 document.body.appendChild(PDL.canvas);
 
@@ -46,14 +46,18 @@ PDL.camY     = PDL.origin.y - (PDL.canvas.height/2);
 PDL.camDX    = PDL.camX;
 PDL.camDY    = PDL.camY;
 PDL.camSpeed = 20;
-//Holds current time for timers/frame delta
+// Holds current time for timers/frame delta
 PDL.time = Date.now();
 PDL.lastTime = PDL.time;
 
-
-
 //Disable right-click context menu
 PDL.canvas.oncontextmenu = function (e) {e.preventDefault();};
+
+PDL.canvasResize = function(){
+	PDL.canvas.height = window.innerHeight;
+	PDL.canvas.width  = window.innerWidth;
+}
+window.addEventListener('resize', PDL.canvasResize);
 
 
 
@@ -118,23 +122,40 @@ PDL.RNG = function(min,max,int){
 };
 
 
-//Return FPS for display //TODO shit needs fixin
-// PDL.fps = {
-// 	lastFrame: Date.now(),
-// 	updateInterval: 1000,
-// 	timer: Date.now()+this.updateInterval, 
-// 	flag: 0,
-// 	get:()=>{
-// 		var now = Date.now()
-// 		if (now<PDL.fps.timer){return}
-// 		var fps = Math.floor(1000/(now - PDL.fps.lastFrame));
-// 		PDL.fps.lastFrame = now;
-// 		PDL.fps.flag++
-// 		if(PDL.fps.flag>2){PDL.fps.timer = now+PDL.fps.updateInterval;}
-// 		return fps;
-// 	}
-// };
 
-PDL.fps = function(delta){
-	return delta;
+
+// FPS calculation object
+PDL.fps = {
+	fps: 0,
+	fpsInterval: 250,
+	fpsTimer: 0,
+	fpsAvg: [],
+
+	get:(delta)=>{
+		PDL.fps.fpsTimer+=delta;
+		var frame = Math.round(1000/delta);
+
+		if(PDL.fps.fpsTimer>=PDL.fps.fpsInterval){
+			var sum = 0;
+			PDL.fps.fpsTimer = 0;
+			PDL.fps.fpsAvg.forEach(f => {
+				sum += f;
+			});
+			PDL.fps.fps = Math.round(sum / PDL.fps.fpsAvg.length)
+			PDL.fps.fpsAvg = [];
+			return PDL.fps.fps;
+		}else{
+			PDL.fps.fpsAvg.push(frame);
+			return null;
+		}
+	},
+
+	draw:(delta)=>{
+		PDL.fps.get(delta);
+		var fSize = 12
+		PDL.ctx.font = `${fSize}px Lucida Sans Unicode`;
+		PDL.fps.fps <=40 ? PDL.ctx.fillStyle = "rgb(255,0,0)" : PDL.ctx.fillStyle = "rgb(0,255,0)";
+		PDL.ctx.fillText(`FPS: ${PDL.fps.fps}`,2,fSize)
+	}
+	
 }

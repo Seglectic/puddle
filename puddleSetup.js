@@ -34,17 +34,6 @@ PDL.scanLines = function(){
     if(PDL.refreshScanLine>PDL.canvas.height){PDL.refreshScanLine=0;}
 }
 
-//Draw FPS
-PDL.fpsTimer = 300
-PDL.drawFPS = function(delta){
-    // var fps = PDL.fps();
-    var fps = Math.floor(1000/delta)
-
-    PDL.ctx.font = "11px Lucida Sans Unicode";
-    fps <=25 ? PDL.ctx.fillStyle = "rgb(255,0,0)" : PDL.ctx.fillStyle = "rgb(0,255,0)";
-    PDL.ctx.fillText("FPS: "+fps,0,11)
-}
-
 
 //Smoothly update camera position //NOTE Camera stuff may deserve its own file?
 PDL.cameraUpdate = function(){
@@ -64,24 +53,25 @@ PDL.cameraUpdate = function(){
 */
 //TODO maybe abstract this elsewhere? 
 //TODO Use frame delta for other timers
+PDL.timeEnd=Date.now();
 
 puddleUpdate = function(){
     PDL.timeStart = Date.now();
-    var delta = PDL.timeStart - PDL.timeEnd;
+    var delta = Math.abs( PDL.timeEnd - PDL.timeStart );
     
     PDL.drawbG();
     PDL.cameraUpdate();
 
-    // PDL.drawFPS(delta);
-   
-    PDL.player.update();
+    PDL.player.update(delta);
 
     PDL.crunchChunks(PDL.timeStart);
 
+    
+    PDL.fps.draw(delta);
     PDL.scanLines();
+    PDL.timeEnd = PDL.timeStart;
 
-    PDL.timeEnd = Date.now();
 };
 
 
-setInterval(puddleUpdate,16.667);
+setInterval(puddleUpdate,16.6667);

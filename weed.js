@@ -8,13 +8,20 @@
 //Collides with and bumps against mouse?
 
 PDL.weed = function(x,y,vx,vy){
-    this.x         = x || PDL.origin.x + PDL.RNG(-PDL.chunkSize,PDL.chunkSize);
-	this.y         = y || PDL.origin.y + PDL.RNG(-PDL.chunkSize,PDL.chunkSize);
-	this.vx        = vx || PDL.RNG(-1,1); 
-    this.vy        = vy || PDL.RNG(-1,1);
+    this.x         = x || PDL.origin.x + PDL.RNG(-PDL.chunkSize*10,PDL.chunkSize*10);
+	this.y         = y || PDL.origin.y + PDL.RNG(-PDL.chunkSize*10,PDL.chunkSize*10);
+	this.vx        = vx || PDL.RNG(-0.2,0.2); 
+    this.vy        = vy || PDL.RNG(-0.2,0.2);
     this.radius    = 5;
     this.bearing   = Math.random()*(Math.PI*2);
     this.friction = 0.1
+
+    //Pad spacings?
+    this.padSpace = this.radius;
+    this.pad1X = PDL.RNG(-this.padSpace,this.padSpace);
+    this.pad1Y = PDL.RNG(-this.padSpace,this.padSpace);
+    this.pad2X = PDL.RNG(-this.padSpace,this.padSpace);
+    this.pad2Y = PDL.RNG(-this.padSpace,this.padSpace);
     
     this.color = `rgb(150,${PDL.RNG(180,255)},${PDL.RNG(100,200)})`;
 
@@ -41,11 +48,11 @@ PDL.weed = function(x,y,vx,vy){
         //Apply Friction
         // this.vx>0 ? this.vx-=this.friction : this.vx=0;
         // this.vy>0 ? this.vy-=this.friction : this.vy=0;
-        this.vy += (0 - this.vy)*0.2
-        this.vx += (0 - this.vx)*0.2
+        this.vy += (0 - this.vy)*0.02
+        this.vx += (0 - this.vx)*0.02
 
 
-        if(PDL.pointCircleCollide(PDL.mouse.worldX,PDL.mouse.worldY,this.x,this.y,this.radius*2)){
+        if(PDL.pointCircleCollide(PDL.mouse.worldX,PDL.mouse.worldY,this.x,this.y,this.radius*4)){
 
             var moveX = (this.x - PDL.mouse.worldX ) * 0.01;
             var moveY = (this.y - PDL.mouse.worldY ) * 0.01;
@@ -53,7 +60,6 @@ PDL.weed = function(x,y,vx,vy){
             this.vx+= moveX
             this.vy+= moveY
             
-            console.log(this.moveX,this.moveY);
         }
         this.draw();
     }
@@ -77,13 +83,14 @@ PDL.weed = function(x,y,vx,vy){
     
         PDL.ctx.beginPath();
         PDL.ctx.arc(worldX,worldY,this.radius,0,2*Math.PI)
-        PDL.ctx.arc(worldX-(this.radius/0.8),worldY,this.radius,0,2*Math.PI)
-        PDL.ctx.arc(worldX+(this.radius*0.8),worldY-(this.radius*0.8),this.radius,0,2*Math.PI)
+        PDL.ctx.arc(worldX+this.pad1X,worldY+this.pad1Y,this.radius,0,2*Math.PI)
+        PDL.ctx.arc(worldX+this.pad2X,worldY+this.pad2Y,this.radius,0,2*Math.PI)
+        // PDL.ctx.arc(worldX+(this.radius*0.8),worldY-(this.radius*0.8),this.radius,0,2*Math.PI)
         PDL.ctx.fill();
 	}
 }
 
-// Spawn shrimp
-for (let i = 0; i < 5; i++) {
+// Spawn duckweed   
+for (let i = 0; i < 100; i++) {
     new PDL.weed()
 }

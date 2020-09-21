@@ -4,9 +4,8 @@ body{
 	background:rgb(50,50,100);
 	font-family:monospace, courier;
 	color:white;
+	overflow: hidden; /* Hide scrollbars */
+	margin: 0;
+    padding: 0;
 }
 
-html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-}
