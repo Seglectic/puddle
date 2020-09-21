@@ -5,10 +5,6 @@
 // ┃  as well as spawning  initial inhabitants                                                                         ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
-
-
-
-
 /*
 					VISUAL FX
 		Defines some fancy/necessary routines
@@ -39,8 +35,11 @@ PDL.scanLines = function(){
 }
 
 //Draw FPS
-PDL.drawFPS = function(){
-    var fps = PDL.fps.get();
+PDL.fpsTimer = 300
+PDL.drawFPS = function(delta){
+    // var fps = PDL.fps();
+    var fps = Math.floor(1000/delta)
+
     PDL.ctx.font = "11px Lucida Sans Unicode";
     fps <=25 ? PDL.ctx.fillStyle = "rgb(255,0,0)" : PDL.ctx.fillStyle = "rgb(0,255,0)";
     PDL.ctx.fillText("FPS: "+fps,0,11)
@@ -64,25 +63,24 @@ PDL.cameraUpdate = function(){
 					Main Game Loop
 */
 //TODO maybe abstract this elsewhere? 
-//TODO calculate frame delta and feed to subsequent objects for their timers
+//TODO Use frame delta for other timers
 
 puddleUpdate = function(){
-    PDL.time = Date.now();
-    var delta =
-
+    PDL.timeStart = Date.now();
+    var delta = PDL.timeStart - PDL.timeEnd;
+    
     PDL.drawbG();
     PDL.cameraUpdate();
 
-    // PDL.drawFPS();
-
+    // PDL.drawFPS(delta);
    
     PDL.player.update();
-    PDL.drawChunks();
 
-
-    PDL.crunchChunks(PDL.time);
+    PDL.crunchChunks(PDL.timeStart);
 
     PDL.scanLines();
+
+    PDL.timeEnd = Date.now();
 };
 
 

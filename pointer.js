@@ -25,8 +25,7 @@ PDL.mouse = {
 		PDL.mouse.vx 	 = PDL.mouse.x - PDL.mouse.prevX;
 		PDL.mouse.vy 	 = PDL.mouse.y - PDL.mouse.prevY;
 		PDL.mouse.prevX  = PDL.mouse.x;
-		PDL.mouse.prevY  = PDL.mouse.y;
-		
+		PDL.mouse.prevY  = PDL.mouse.y;		
 	}
 
 	PDL.mouse.mouseDown = function(e){

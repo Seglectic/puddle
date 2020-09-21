@@ -35,8 +35,8 @@ PDL.ctx           = PDL.canvas.getContext("2d");
 document.body.appendChild(PDL.canvas);
 
 // Puddle width & height in pixels
-PDL.width    = 800;
-PDL.height   = 800;
+PDL.width    = 12800;
+PDL.height   = 12800;
 //Center of map
 PDL.origin   = {x:PDL.width/2, y:PDL.height/2};
 //Camera render offsets (Centered)
@@ -119,18 +119,22 @@ PDL.RNG = function(min,max,int){
 
 
 //Return FPS for display //TODO shit needs fixin
-PDL.fps = {
-	lastFrame: Date.now(),
-	updateInterval: 1000,
-	timer: Date.now()+this.updateInterval, 
-	flag: 0,
-	get:()=>{
-		var now = Date.now()
-		if (now<PDL.fps.timer){return}
-		var fps = Math.floor(1000/(now - PDL.fps.lastFrame));
-		PDL.fps.lastFrame = now;
-		PDL.fps.flag++
-		if(PDL.fps.flag>2){PDL.fps.timer = now+PDL.fps.updateInterval;}
-		return fps;
-	}
-};
+// PDL.fps = {
+// 	lastFrame: Date.now(),
+// 	updateInterval: 1000,
+// 	timer: Date.now()+this.updateInterval, 
+// 	flag: 0,
+// 	get:()=>{
+// 		var now = Date.now()
+// 		if (now<PDL.fps.timer){return}
+// 		var fps = Math.floor(1000/(now - PDL.fps.lastFrame));
+// 		PDL.fps.lastFrame = now;
+// 		PDL.fps.flag++
+// 		if(PDL.fps.flag>2){PDL.fps.timer = now+PDL.fps.updateInterval;}
+// 		return fps;
+// 	}
+// };
+
+PDL.fps = function(delta){
+	return delta;
+}

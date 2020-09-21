@@ -1,19 +1,14 @@
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃              Wyrm                ┃
+    // ┃                                  ┃
+    // ┃  Wyrms feast on shrimp and like  ┃
+    // ┃  to wiggly around making sounds  ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+    //TODO set these up?
 
 
-
-            // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-            // ┃              Shrimp                     ┃
-            // ┃                                         ┃
-            // ┃  The smallest creatures living in the   ┃
-            // ┃  puddle. These provide the necessary    ┃
-            // ┃  nutrients for bigger critters as well  ┃
-            // ┃  as some visual flair through activity. ┃
-            // ┃                                         ┃
-            // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
-			//TODO Create a critter prototype using the shrimp as a base to reuse?
-			//TODO Keep functions 
-PDL.shrimp = function(x,y,vx,vy){
+PDL.wyrm = function(x,y,vx,vy){
 	this.x         = x || PDL.origin.x + PDL.RNG(-PDL.chunkSize/2,PDL.chunkSize/2);
 	this.y         = y || PDL.origin.y + PDL.RNG(-PDL.chunkSize/2,PDL.chunkSize/2);
 	this.vx        = vx || PDL.RNG(-1,1); 
@@ -21,27 +16,8 @@ PDL.shrimp = function(x,y,vx,vy){
 	this.px1       = Math.random()*10; this.py1 = Math.random()*10;
 	this.px2       = Math.random()*10; this.py2 = Math.random()*10;
 	this.prevX     = this.y;
-	this.prevY     = this.x;
-	this.nutrition = PDL.RNG(30,40,true); //Energy value provided
-	this.width     = 4;
-	this.height    = 4;
-
-	this.vTimer    = new Date().getTime();
-	this.vInterval = PDL.RNG(400,600,true);
-	this.tailX     = this.x; 
-	this.tailY     = this.y;
-	this.chunk 	   = PDL.chunkPt(this.x,this.y)
-	this.lastChunk = this.chunk;
-	
-	this.chunk.ents.push(this) //Push self to chunk for iterating
-	
-	this.tailColor = "rgb(207,87,87)";
-	
-	//Set gender and color
-	this.female    = PDL.RNG(0,1)>0.5 ? true : false;
-	this.female ? 
-		this.color = `rgb(${PDL.RNG(150,255)},150,200)`:
-		this.color = `rgb(${PDL.RNG(100,150)},150,${PDL.RNG(200,255)})`;
+    this.prevY     = this.x;
+    
 
 	//Check for wall collisions and bounce 
 	this.wallCollide = function(){
@@ -74,10 +50,10 @@ PDL.shrimp = function(x,y,vx,vy){
 
 		//Place self into active chunk 
 		if(this.lastChunk!=this.chunk){ //Remove from prior chunk (if different)		
-			var removeIndex = this.lastChunk.ents.indexOf(this);
-			this.lastChunk.ents.splice(removeIndex,1);
+			var removeIndex = this.lastChunk.shrimps.indexOf(this);
+			this.lastChunk.shrimps.splice(removeIndex,1);
 			this.lastChunk = this.chunk;
-			this.chunk.ents.push(this)
+			this.chunk.shrimps.push(this)
 		}
 
 		this.veloGet(time);
@@ -110,9 +86,4 @@ PDL.shrimp = function(x,y,vx,vy){
 		PDL.ctx.fillRect(this.x-(this.width/2)-PDL.camX,this.y-(this.height/2)-PDL.camY,this.width,this.height)
 	}
 
-};
-
-// Spawn shrimp
-for (let i = 0; i < 10; i++) {
-    new PDL.shrimp()
 }
