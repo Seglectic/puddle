@@ -46,17 +46,18 @@ PDL.mouse = {
 		}
 	};
 	
-addEventListener('mousemove',PDL.mouse.mouseMove)
-addEventListener('mousedown',PDL.mouse.mouseDown);
-addEventListener('mouseup'  ,PDL.mouse.mouseUp);
+PDL.canvas.addEventListener('mousemove',PDL.mouse.mouseMove)
+PDL.canvas.addEventListener('mousedown',PDL.mouse.mouseDown);
+PDL.canvas.addEventListener('mouseup'  ,PDL.mouse.mouseUp);
 
 
 
 //Handles touch events
 
 PDL.touch = {
-	start:()=>{
-
+	start:(e)=>{
+		var x = e.touches[0].clientX
+		var y = e.touches[0].clientY
 	},
 
 	move:()=>{
@@ -66,4 +67,13 @@ PDL.touch = {
 	end:()=>{
 		
 	}
+
+
 }
+
+PDL.canvas.addEventListener("touchstart", PDL.touch.start, false);
+// PDL.ctx.addEventListener("touchmove", PDL.touch.move, false);
+// PDL.ctx.addEventListener("touchend", PDL.touch.end, false);
+
+// PDL.ctx.addEventListener("touchcancel", handleCancel, false); //prob wont need?
+// https://developer.mozilla.org/en-US/docs/Web/API/Touch_events
