@@ -93,8 +93,3 @@ PDL.weed = function(x,y,vx,vy){
 	}
 }
 
-// Spawn duckweed 
-//TODO have duckweed spawn in little clusters of 3-5, maybe make them slowly stick together
-for (let i = 0; i < 100; i++) {
-    new PDL.weed()
-}

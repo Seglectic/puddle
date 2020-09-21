@@ -93,7 +93,6 @@ PDL.rectCollide = function(x1,y1,w1,h1,x2,y2,w2,h2){
    }
 }
 
-
 //  Return 2D distance
 PDL.distance = function(x1,y1,x2,y2){
 	var d = Math.sqrt( ((x2-x1)*(x2-x1)) + ((y2-y1)*(y2-y1)) );
@@ -108,7 +107,6 @@ PDL.circleCollide = function(x1,y1,r1,x2,y2,r2){
 	else{return false;}
 }
 
-
 // Clamp number to range
 PDL.clamp = function(num, min, max) {
 	return num <= min ? min : num >= max ? max : num;
@@ -121,35 +119,26 @@ PDL.RNG = function(min,max,int){
 	return RNG;
 };
 
-
-
-
-// FPS calculation object
+//Frame rate calculator
 PDL.fps = {
 	fps: 0,
 	fpsInterval: 250,
 	fpsTimer: 0,
 	fpsAvg: [],
-
 	get:(delta)=>{
 		PDL.fps.fpsTimer+=delta;
 		var frame = Math.round(1000/delta);
-
-		if(PDL.fps.fpsTimer>=PDL.fps.fpsInterval){
-			var sum = 0;
-			PDL.fps.fpsTimer = 0;
-			PDL.fps.fpsAvg.forEach(f => {
-				sum += f;
-			});
-			PDL.fps.fps = Math.round(sum / PDL.fps.fpsAvg.length)
-			PDL.fps.fpsAvg = [];
-			return PDL.fps.fps;
-		}else{
+		if(PDL.fps.fpsTimer<PDL.fps.fpsInterval){
 			PDL.fps.fpsAvg.push(frame);
 			return null;
 		}
+		var sum = 0;
+		PDL.fps.fpsAvg.forEach(f => {sum += f;});
+		PDL.fps.fps = Math.round(sum / PDL.fps.fpsAvg.length)
+		PDL.fps.fpsAvg = [];
+		PDL.fps.fpsTimer = 0;
+		return PDL.fps.fps;
 	},
-
 	draw:(delta)=>{
 		PDL.fps.get(delta);
 		var fSize = 12
@@ -157,5 +146,4 @@ PDL.fps = {
 		PDL.fps.fps <=40 ? PDL.ctx.fillStyle = "rgb(255,0,0)" : PDL.ctx.fillStyle = "rgb(0,255,0)";
 		PDL.ctx.fillText(`FPS: ${PDL.fps.fps}`,2,fSize)
 	}
-	
 }

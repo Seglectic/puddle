@@ -43,8 +43,16 @@ PDL.cameraUpdate = function(){
 
 
 
+// Spawn shrimp
+for (let i = 0; i < 5; i++) {
+    new PDL.shrimp()
+}
 
-
+// Spawn duckweed 
+//TODO have duckweed spawn in little clusters of 3-5, maybe make them slowly stick together
+for (let i = 0; i < 100; i++) {
+    new PDL.weed()
+}
 
 
 
@@ -85,9 +93,9 @@ PDL.titleScreen = function(){
     
 }
 
+
 PDL.updateBuffer = PDL.titleScreen;
 
 
-
-
-PDL.updateBuffer = setInterval(PDL.titleScreen,16.6667);
+//NOTE Bypassing title screen until Tone.js is implemented
+PDL.updateBuffer = setInterval(PDL.puddleUpdate,16.6667);

@@ -114,7 +114,3 @@ PDL.shrimp = function(x,y,vx,vy){
 
 };
 
-// Spawn shrimp
-for (let i = 0; i < 5; i++) {
-    new PDL.shrimp()
-}

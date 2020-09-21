@@ -56,6 +56,7 @@ PDL.chunk = function(x,y){
 // ┃  of screen and chunk size  ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 PDL.chunkInit = function(){
+    PDL.chunks = []
     for (let y = 0; y < PDL.height/PDL.chunkSize; y++) {
         var chunkRow = [];
         for (let x = 0; x < PDL.width/PDL.chunkSize; x++) {
@@ -68,20 +69,15 @@ PDL.chunkInit = function(){
 PDL.chunkInit();
 
 
-// Returns the chunk at given coordinates (point)
-
+   // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+   // ┃  Returns the chunk at given  ┃
+   // ┃  coordinates (point)         ┃
+   // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 PDL.chunkPt = function(x,y){
-    // if(PDL.pointRectCollide(x,y,0,0,PDL.width,PDL.height)){
-    //     console.log('mwehp');
-    //     return null;
-    // }
     //If the point is outside bounds, no chunk.
     if(!PDL.pointRectCollide(x,y,0,0,PDL.width,PDL.height)){return null;}
-
     var x = PDL.clamp( Math.floor( x/PDL.chunkSize ) , 0 , PDL.maxChunksX)
     var y = PDL.clamp( Math.floor( y/PDL.chunkSize ) , 0 , PDL.maxChunksY)
-    
-
     return PDL.chunks[y][x] 
 }
 
@@ -91,11 +87,9 @@ PDL.chunkPt = function(x,y){
 // ┃  Returns a 2D Array of chunks    ┃
 // ┃  currently within viewport area  ┃
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-
 PDL.activeChunks = function(){
     var active = []
-    var buffer = 1; //The amt of extra chunks to render offscreen
-    //Get starting screen chunks
+    var buffer = 1; //The amt of extra chunks to render off camera
 
     for (let y=PDL.camY-(buffer*PDL.chunkSize); y<PDL.canvas.height+PDL.camY+(buffer*PDL.chunkSize); y+=PDL.chunkSize) {
         var activeRow = []
@@ -110,7 +104,7 @@ PDL.activeChunks = function(){
 }
 
 
-//TODO Create routine to get adjacent chunks 
+//TODO Create routine to get chunks adjacent to pt
 //NOTE Most important ^
 PDL.adjacentChunks = function(){
 
