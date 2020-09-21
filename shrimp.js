@@ -1,6 +1,3 @@
-
-
-
             // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
             // ┃              Shrimp                     ┃
             // ┃                                         ┃
@@ -69,8 +66,10 @@ PDL.shrimp = function(x,y,vx,vy){
 		this.vy = noise.perlin2(this.py1,this.py2);
 	}
 	
-	//Update logic and draw ent
-	//TODO Convert update to use frame delta
+    // ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+    // │  Shrimp update                                                                                                    │
+	// └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+	//TODO Update to use delta
 	this.update = function(time){
 
 		//Place self into active chunk 
@@ -95,7 +94,9 @@ PDL.shrimp = function(x,y,vx,vy){
 		this.prevY = this.y;
 	}
 	
-	//Manages how ent is drawn
+    // ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+    // │  Draw Shrimp                                                                                                      │
+    // └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 	this.draw = function(){
 		//Draw connecting line
 		PDL.ctx.strokeStyle = this.tailColor;

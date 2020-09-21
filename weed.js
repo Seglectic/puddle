@@ -30,6 +30,9 @@ PDL.weed = function(x,y,vx,vy){
 
     this.chunk.ents.push(this) //Push self to chunk for iterating
 
+    // ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+    // │  Update Weed                                                                                                      │
+    // └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
     this.update = function(){
         
         //Place self into active chunk 
@@ -40,7 +43,6 @@ PDL.weed = function(x,y,vx,vy){
 			this.lastChunk = this.chunk;
 			this.chunk.ents.push(this)
         }
-
 
         //Move according to velocity
         this.x += this.vx*2;
@@ -65,17 +67,11 @@ PDL.weed = function(x,y,vx,vy){
         this.draw();
     }
 
+
+    // ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+    // │  Draw Weed                                                                                                        │
+    // └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
     this.draw = function(){
-		//Draw connecting line
-		// PDL.ctx.strokeStyle = this.tailColor;
-		// PDL.ctx.lineWidth = 1;
-		// PDL.ctx.beginPath();
-		// PDL.ctx.moveTo(this.x-PDL.camX,this.y-PDL.camY);
-		// PDL.ctx.lineTo(this.tailX-PDL.camX,this.tailY-PDL.camY);
-		// PDL.ctx.stroke();
-		// //Draw Tail
-		// PDL.ctx.fillStyle = this.tailColor;
-		// PDL.ctx.fillRect(this.tailX-(this.width/4)-PDL.camX,this.tailY-(this.height/4)-PDL.camY,this.width/2,this.height/2)
         //Draw Body
         var worldX = this.x-(this.radius/2)-PDL.camX
         var worldY = this.y-(this.radius/2)-PDL.camY
@@ -85,8 +81,10 @@ PDL.weed = function(x,y,vx,vy){
         PDL.ctx.beginPath();
         PDL.ctx.arc(worldX,worldY,this.radius,0,2*Math.PI)
         PDL.ctx.fill();
+        PDL.ctx.beginPath();
         PDL.ctx.arc(worldX+this.pad1X,worldY+this.pad1Y,this.radius,0,2*Math.PI)
         PDL.ctx.fill();
+        PDL.ctx.beginPath();
         PDL.ctx.arc(worldX+this.pad2X,worldY+this.pad2Y,this.radius,0,2*Math.PI)
         // PDL.ctx.arc(worldX+(this.radius*0.8),worldY-(this.radius*0.8),this.radius,0,2*Math.PI)
         PDL.ctx.fill();
