@@ -46,18 +46,21 @@ PDL.camY     = PDL.origin.y - (PDL.canvas.height/2);
 PDL.camDX    = PDL.camX;
 PDL.camDY    = PDL.camY;
 PDL.camSpeed = 20;
-// Holds current time for timers/frame delta
+// Holds current time
 PDL.time = Date.now();
 PDL.lastTime = PDL.time;
+// Current time values for calculating delta
+PDL.timeStart=Date.now();
+PDL.timeEnd=Date.now();
+
 
 //Disable right-click context menu
 PDL.canvas.oncontextmenu = function (e) {e.preventDefault();};
-
-PDL.canvasResize = function(){
+//Window resize callback for window scaling
+window.addEventListener('resize', ()=>{
 	PDL.canvas.height = window.innerHeight;
 	PDL.canvas.width  = window.innerWidth;
-}
-window.addEventListener('resize', PDL.canvasResize);
+});
 
 
 
