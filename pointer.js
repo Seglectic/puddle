@@ -1,17 +1,20 @@
 
-		// 		Pointer
-		// Handles pointer presses
-		//     and movement
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃  										        Pointer                                                            ┃
+// ┃  										Handles pointer presses                                                    ┃
+// ┃  										and movement                                                               ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
 PDL.mouse = {
-	x: -100,
-	y: -100,
-	prevX: 0,
-	prevY: 0,
-	vx: 0,
-	vy: 0,
-	lClick: false,
-	rClick: false,
-	mClick: false,
+	x      : -100,
+	y      : -100,
+	prevX  : 0,
+	prevY  : 0,
+	vx     : 0,
+	vy     : 0,
+	lClick : false,
+	rClick : false,
+	mClick : false,
 	lrClick: false
 }
 
@@ -53,7 +56,6 @@ PDL.canvas.addEventListener('mouseup'  ,PDL.mouse.mouseUp);
 
 
 //Handles touch events
-
 PDL.touch = {
 	start:(e)=>{
 		var x = e.touches[0].clientX
@@ -67,8 +69,6 @@ PDL.touch = {
 	end:()=>{
 		
 	}
-
-
 }
 
 PDL.canvas.addEventListener("touchstart", PDL.touch.start, false);

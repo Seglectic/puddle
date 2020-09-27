@@ -41,6 +41,12 @@ PDL.player = {
 						PDL.player.spawnTimer=0;
 					}
 				}
+
+				if(PDL.gPad.debug){
+					if(PDL.chunkDraw){PDL.chunkDraw=false}else{
+						PDL.chunkDraw=true;
+					}
+				}
 	}
 }
 

@@ -49,9 +49,14 @@ for (let i = 0; i < 5; i++) {
 }
 
 // Spawn duckweed 
-//TODO have duckweed spawn in little clusters of 3-5, maybe make them slowly stick together
-for (let i = 0; i < 100; i++) {
-    new PDL.weed()
+//TODO maybe make them slowly stick together
+for (let i = 0; i < 50; i++) {
+    //Create a local X,Y zone to spawn a cluster
+    var lX = PDL.origin.x + PDL.RNG(-PDL.chunkSize*10,PDL.chunkSize*10);
+    var lY = PDL.origin.y + PDL.RNG(-PDL.chunkSize*10,PDL.chunkSize*10);
+    for (let j = 0; j < PDL.RNG(3,8,true); j++) {
+        new PDL.weed(lX+PDL.RNG(-50,50),lY+PDL.RNG(-50,50));
+    }
 }
 
 

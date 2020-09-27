@@ -5,6 +5,7 @@
 // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 PDL.chunks = [];
+PDL.chunkDraw = false;  //Should chunk debug be drawn?
 PDL.chunkSize = 200; //Pixel size^2 (Should be a multiple of screen height/width)
 PDL.maxChunksX = PDL.width/PDL.chunkSize;
 PDL.maxChunksY = PDL.height/PDL.chunkSize;
@@ -127,7 +128,9 @@ PDL.crunchChunks = function(time){
     var active = PDL.activeChunks()
     active.forEach(chunkRow => {
         chunkRow.forEach(chunk =>{
-            // chunk.draw();
+            if(PDL.chunkDraw){
+                chunk.draw();
+            }
 
             chunk.update(time);
 

@@ -30,6 +30,27 @@ PDL.weed = function(x,y,vx,vy){
 
     this.chunk.ents.push(this) //Push self to chunk for iterating
 
+    // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+    // ┃  Process collision with other entities  ┃
+    // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+    //FIXME Uhhh, seems to affect all ents? iono
+    this.collide = function(){
+        var ents = []; //Ents to collide against
+        PDL.adjacentChunks(this.x,this.y).forEach(c => {
+            c.ents.forEach(e=>{
+                ents.push(e);
+            });
+        });
+
+        ents.forEach(e => {
+            var dist = PDL.distance(e.x,e.y,this.x,this.y);
+            if(dist<1){this.x+=1;   }
+            // console.log(dist)
+        });
+
+
+    }
+
     // ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
     // │  Update Weed                                                                                                      │
     // └───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -56,14 +77,12 @@ PDL.weed = function(x,y,vx,vy){
 
 
         if(PDL.pointCircleCollide(PDL.mouse.worldX,PDL.mouse.worldY,this.x,this.y,this.radius*4)){
-
             var moveX = (this.x - PDL.mouse.worldX ) * 0.01;
             var moveY = (this.y - PDL.mouse.worldY ) * 0.01;
-
             this.vx+= moveX
             this.vy+= moveY
-            
         }
+        // this.collide();
         this.draw();
     }
 
