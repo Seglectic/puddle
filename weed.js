@@ -51,8 +51,8 @@ PDL.weed = function(x,y,vx,vy){
         //Apply Friction
         // this.vx>0 ? this.vx-=this.friction : this.vx=0;
         // this.vy>0 ? this.vy-=this.friction : this.vy=0;
-        this.vy += (0 - this.vy)*0.02
-        this.vx += (0 - this.vx)*0.02
+        this.vy += (0 - this.vy)*this.friction
+        this.vx += (0 - this.vx)*this.friction
 
 
         if(PDL.pointCircleCollide(PDL.mouse.worldX,PDL.mouse.worldY,this.x,this.y,this.radius*4)){

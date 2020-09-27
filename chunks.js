@@ -69,10 +69,10 @@ PDL.chunkInit = function(){
 PDL.chunkInit();
 
 
-   // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-   // ┃  Returns the chunk at given  ┃
-   // ┃  coordinates (point)         ┃
-   // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃  Returns the chunk at given  ┃
+// ┃  coordinates (point)         ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 PDL.chunkPt = function(x,y){
     //If the point is outside bounds, no chunk.
     if(!PDL.pointRectCollide(x,y,0,0,PDL.width,PDL.height)){return null;}
@@ -104,10 +104,22 @@ PDL.activeChunks = function(){
 }
 
 
-//TODO Create routine to get chunks adjacent to pt
-//NOTE Most important ^
-PDL.adjacentChunks = function(){
-
+// ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+// ┃  Returns array of chunks adjacent to given point  ┃
+// ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+PDL.adjacentChunks = function(x,y){
+    var adj = [];
+    adj.push(PDL.chunkPt(x,y));                                 // Center
+    adj.push(PDL.chunkPt(x-PDL.chunkSize,y-PDL.chunkSize));     // Top Left
+    adj.push(PDL.chunkPt(x,y-PDL.chunkSize));                   // Top
+    adj.push(PDL.chunkPt(x+PDL.chunkSize,y-PDL.chunkSize));     // Top Right
+    adj.push(PDL.chunkPt(x-PDL.chunkSize,y));                   // Left
+    adj.push(PDL.chunkPt(x+PDL.chunkSize,y));                   // Right
+    adj.push(PDL.chunkPt(x-PDL.chunkSize,y+PDL.chunkSize));     // Bottom Left
+    adj.push(PDL.chunkPt(x,y+PDL.chunkSize));                   // Bottom
+    adj.push(PDL.chunkPt(x+PDL.chunkSize,y+PDL.chunkSize));     // Bottom Right
+    adj = adj.filter(c => c!= null);                            // Filter null chunks out
+    return adj
 }
 
 //Iterate and update  all active chunks         
@@ -118,7 +130,6 @@ PDL.crunchChunks = function(time){
             // chunk.draw();
 
             chunk.update(time);
-
 
         })
     });

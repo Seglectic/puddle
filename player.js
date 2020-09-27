@@ -6,7 +6,7 @@
 
 
 PDL.player = {
-	spawnInterval:200,
+	spawnInterval:100,
 	spawnTimer:0,
 
 	update:(delta)=>{
@@ -27,6 +27,20 @@ PDL.player = {
 				PDL.player.spawnTimer=0;
 			}
 		}
+
+				//left-Click to create debug	
+				if(PDL.mouse.rClick){;
+					PDL.player.spawnTimer+=delta;
+					if(PDL.player.spawnTimer>=PDL.player.spawnInterval){
+						var worldX = PDL.mouse.worldX;
+						var worldY = PDL.mouse.worldY;
+						if(PDL.pointRectCollide(worldX,worldY,1,1,PDL.width-1,PDL.height-1)){
+							// new PDL.weed(PDL.mouse.worldX,PDL.mouse.worldY,PDL.mouse.vx,PDL.mouse.vy); 
+							PDL.adjacentChunks(PDL.mouse.worldX,PDL.mouse.worldY);
+						}
+						PDL.player.spawnTimer=0;
+					}
+				}
 	}
 }
 
