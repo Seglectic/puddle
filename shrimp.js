@@ -24,7 +24,7 @@ PDL.shrimp = function(x,y,vx,vy){
 	this.height    = 4;
 
 	//TODO Convert update to use frame delta
-	this.vTimer    = new Date().getTime();
+	this.vTimer    = new Date().getTime() - 500;
 	this.vInterval = PDL.RNG(400,600,true);
 	this.tailX     = this.x; 
 	this.tailY     = this.y;

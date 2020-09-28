@@ -43,10 +43,16 @@ PDL.cameraUpdate = function(){
 
 
 
-// Spawn shrimp
-for (let i = 0; i < 5; i++) {
-    new PDL.shrimp()
+// Spawn shrimp in clusters
+for (let i = 0; i < 50; i++) {
+    //Create a local X,Y zone to spawn a cluster
+    var lX = PDL.origin.x + PDL.RNG(-PDL.chunkSize*10,PDL.chunkSize*10);
+    var lY = PDL.origin.y + PDL.RNG(-PDL.chunkSize*10,PDL.chunkSize*10);
+    for (let j = 0; j < PDL.RNG(5,20,true); j++) {
+        new PDL.shrimp(lX+PDL.RNG(-50,50),lY+PDL.RNG(-50,50),0,0);
+    }
 }
+
 
 // Spawn duckweed 
 //TODO maybe make them slowly stick together
