@@ -35,8 +35,7 @@ PDL.player = {
 						var worldX = PDL.mouse.worldX;
 						var worldY = PDL.mouse.worldY;
 						if(PDL.pointRectCollide(worldX,worldY,1,1,PDL.width-1,PDL.height-1)){
-							// new PDL.weed(PDL.mouse.worldX,PDL.mouse.worldY,PDL.mouse.vx,PDL.mouse.vy); 
-							PDL.adjacentChunks(PDL.mouse.worldX,PDL.mouse.worldY);
+							new PDL.weed(PDL.mouse.worldX,PDL.mouse.worldY,PDL.mouse.vx,PDL.mouse.vy); 
 						}
 						PDL.player.spawnTimer=0;
 					}

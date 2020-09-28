@@ -71,18 +71,13 @@ PDL.timeEnd=Date.now();
 PDL.puddleUpdate = function(){
     PDL.timeStart = Date.now();
     var delta = Math.abs( PDL.timeEnd - PDL.timeStart );
-    
     PDL.drawbG();
     PDL.cameraUpdate();
-
     PDL.player.update(delta);
-
     PDL.crunchChunks(PDL.timeStart); //TODO Convert crunching to frame delta
-
     PDL.fps.draw(delta);
     PDL.scanLines();
     PDL.timeEnd = PDL.timeStart;
-
 };
 
 
@@ -103,4 +98,4 @@ PDL.updateBuffer = PDL.titleScreen;
 
 
 //NOTE Bypassing title screen until Tone.js is implemented
-PDL.updateBuffer = setInterval(PDL.puddleUpdate,16.6667);
+PDL.updateBuffer = setInterval(PDL.puddleUpdate,17);

@@ -33,19 +33,26 @@ PDL.weed = function(x,y,vx,vy){
     // ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
     // ┃  Process collision with other entities  ┃
     // ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-    //FIXME Uhhh, seems to affect all ents? iono
+    //FIXME We probably want a main physics object that applies collisions to each object in the canvas per-frame 
     this.collide = function(){
         var ents = []; //Ents to collide against
         PDL.adjacentChunks(this.x,this.y).forEach(c => {
             c.ents.forEach(e=>{
-                ents.push(e);
+                if(this != e){
+                    ents.push(e);
+                }
             });
         });
 
         ents.forEach(e => {
-            var dist = PDL.distance(e.x,e.y,this.x,this.y);
-            if(dist<1){this.x+=1;   }
-            // console.log(dist)
+                var dist = PDL.distance(e.x,e.y,this.x,this.y);
+
+                if(dist<this.radius*2.5){
+                    this.vx -= (e.x-this.x) * 0.05;
+                    this.vy -= (e.y-this.y) * 0.05;
+                    e.vx    -= (this.x-e.x) * 0.05;
+                    e.vy    -= (this.y-e.y) * 0.05;
+                }
         });
 
 
@@ -82,7 +89,7 @@ PDL.weed = function(x,y,vx,vy){
             this.vx+= moveX
             this.vy+= moveY
         }
-        // this.collide();
+        this.collide();
         this.draw();
     }
 
