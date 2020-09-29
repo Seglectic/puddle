@@ -23,6 +23,8 @@ PDL.shrimp = function(x,y,vx,vy){
 	this.width     = 4;
 	this.height    = 4;
 
+	this.mass = 5;
+
 	//TODO Convert update to use frame delta
 	this.vTimer    = new Date().getTime() - 500;
 	this.vInterval = PDL.RNG(400,600,true);
@@ -111,6 +113,12 @@ PDL.shrimp = function(x,y,vx,vy){
 		//Draw Body
 		PDL.ctx.fillStyle = this.color;
 		PDL.ctx.fillRect(this.x-(this.width/2)-PDL.camX,this.y-(this.height/2)-PDL.camY,this.width,this.height)
+
+		if(PDL.debugDraw){
+			PDL.ctx.font = "10px Arial";
+            PDL.ctx.fillStyle = this.color;
+            PDL.ctx.fillText(`VX${this.vx}| VY${this.vy}`,this.x-PDL.camX,this.y-PDL.camY+10);
+		}
 	}
 
 };
